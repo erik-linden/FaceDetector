@@ -16,13 +16,13 @@ public class IntegralImage {
 	/**
 	 * The integral image source image
 	 */
-	public static double[] integralImage;
+	public double[] integralImage;
 	/**
 	 * The integral image of the squared source image
 	 */
-	public static double[] squareIntegralImage;
-	public static int width;
-	public static int height;
+	public double[] squareIntegralImage;
+	public int width;
+	public int height;
 
 	/**
 	 * For testing.
@@ -86,6 +86,14 @@ public class IntegralImage {
 	 */
 	public int coord(int x, int y) {
 		return x + width*y;
+	}
+	
+	public double xy(int x, int y) {
+		return integralImage[coord(x,y)];
+	}
+	
+	public double xyS(int x, int y) {
+		return squareIntegralImage[coord(x,y)];
 	}
 
 	/**
