@@ -30,7 +30,8 @@ public class IntegralImage {
 	 * @param args
 	 */
 	public static void main(String [ ] args) {
-		IntegralImage img = new IntegralImage("D:\\Dropbox\\BIK\\pro\\TrainingImages\\FACES\\face00001.bmp");
+		File file = new File("D:\\Dropbox\\BIK\\pro\\TrainingImages\\FACES\\face00001.bmp");
+		IntegralImage img = new IntegralImage(file);
 		img.drawIntegralImage(10);
 	}
 
@@ -39,10 +40,7 @@ public class IntegralImage {
 	 * 
 	 * @param fileName name of image to use
 	 */
-	IntegralImage(String fileName) {
-		
-		File file = new File(fileName);
-		
+	IntegralImage(File file) {		
 		try {
 			BufferedImage srcImage = ImageIO.read(file);
 
