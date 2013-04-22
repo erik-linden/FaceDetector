@@ -360,13 +360,85 @@ public class HaarFeature {
 	}
 
 	static void printFeature(int ind) {
+		String black = (char)27+"[1;40m  "+(char)27+"[0m";
+		String white = (char)27+"[31;1m  "+(char)27+"[0m";
+		String gray  = (char)27+"[47;1m  "+(char)27+"[0m";
+
 		ind *= 5;
 		int type = FEATURE_TABLE[ind];
-		int x = FEATURE_TABLE[ind+1];
-		int y = FEATURE_TABLE[ind+2];
+		int xf = FEATURE_TABLE[ind+1];
+		int yf = FEATURE_TABLE[ind+2];
 		int w = FEATURE_TABLE[ind+3];
 		int h = FEATURE_TABLE[ind+4];
 
-		System.out.println("Type: "+type+" x: "+x+" y: "+y+" w: "+w+" h: "+h);
+		System.out.println("Type: "+type+" x: "+xf+" y: "+yf+" w: "+w+" h: "+h);
+
+		switch (type) {
+		case 1:
+			for(int y=0;y<MIN_PATCH_SIDE;y++) {
+				for(int x=0;x<MIN_PATCH_SIDE;x++) {
+					if ((x>=xf && x<xf+w) && (y>=yf && y<yf+h))
+						System.out.print(black);
+					else if ((x>=xf && x<xf+w) && (y>=yf+h && y<yf+2*h))
+						System.out.print(white);
+					else
+						System.out.print(gray);
+				}
+				System.out.print("\n");
+			}
+			break;
+
+		case 2:
+			for(int y=0;y<MIN_PATCH_SIDE;y++) {
+				for(int x=0;x<MIN_PATCH_SIDE;x++) {
+					if ((x>=xf && x<xf+w) && (y>=yf && y<yf+h))
+						System.out.print(white);
+					else if ((x>=xf+w && x<xf+2*w) && (y>=yf && y<yf+h))
+						System.out.print(black);
+					else
+						System.out.print(gray);
+				}
+				System.out.print("\n");
+			}
+			break;
+
+		case 3:
+			for(int y=0;y<MIN_PATCH_SIDE;y++) {
+				for(int x=0;x<MIN_PATCH_SIDE;x++) {
+					if ((x>=xf && x<xf+w) && (y>=yf && y<yf+h))
+						System.out.print(white);
+					else if ((x>=xf+w && x<xf+2*w) && (y>=yf && y<yf+h))
+						System.out.print(black);
+					else if ((x>=xf+2*w && x<xf+3*w) && (y>=yf && y<yf+h))
+						System.out.print(white);
+					else
+						System.out.print(gray);
+				}
+				System.out.print("\n");
+			}
+			break;
+
+		case 4:
+			for(int y=0;y<MIN_PATCH_SIDE;y++) {
+				for(int x=0;x<MIN_PATCH_SIDE;x++) {
+					if ((x>=xf && x<xf+w) && (y>=yf && y<yf+h))
+						System.out.print(white);
+					else if ((x>=xf+w && x<xf+2*w) && (y>=yf && y<yf+h))
+						System.out.print(black);
+					else if ((x>=xf && x<xf+w) && (y>=yf+h && y<yf+2*h))
+						System.out.print(black);
+					else if ((x>=xf+w && x<xf+2*w) && (y>=yf+h && y<yf+2*h))
+						System.out.print(white);
+					else
+						System.out.print(gray);
+				}
+				System.out.print("\n");
+			}
+			break;
+
+		default:
+			break;
+		}
+
 	}
 }
