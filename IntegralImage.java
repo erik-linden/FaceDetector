@@ -156,48 +156,52 @@ public class IntegralImage {
 	 * @param scaleFactor scale the displayed image
 	 */
 	public void drawIntegralImage(double scaleFactor) {
-
 		// We want to display the normalized integral image.
 		double [] img = getNormalizedImg();
-
+		showImg(img, width, height, scaleFactor);
+	}
+	
+	static JFrame showImg(double[] img, int width, int height, double scaleFactor) {
 		// Find the smallest and largest values.
-		double min = Double.MAX_VALUE;
-		double max = Double.MIN_VALUE;
-		for(int i = 0; i<width*height;i++) {
-			if (img[i]>max) {
-				max = img[i];
-			}
-			else if (img[i]<min) {
-				min = img[i];
-			}
-		}
+				double min = Double.MAX_VALUE;
+				double max = Double.MIN_VALUE;
+				for(int i = 0; i<width*height;i++) {
+					if (img[i]>max) {
+						max = img[i];
+					}
+					else if (img[i]<min) {
+						min = img[i];
+					}
+				}
 
-		// Scale the image so that all values are in [0-255]
-		for(int i = 0; i<width*height;i++) {
-			img[i] = (img[i] - min)/(max - min)*255;
-		}
+				// Scale the image so that all values are in [0-255]
+				for(int i = 0; i<width*height;i++) {
+					img[i] = (img[i] - min)/(max - min)*255;
+				}
 
-		// We will write our double array to buffImg, so that 
-		// we can display it.
-		BufferedImage buffImg = new BufferedImage(width, height, 
-				BufferedImage.TYPE_BYTE_GRAY);
+				// We will write our double array to buffImg, so that 
+				// we can display it.
+				BufferedImage buffImg = new BufferedImage(width, height, 
+						BufferedImage.TYPE_BYTE_GRAY);
 
-		// We make a writable raster, write our image array to it
-		// and add the raster to buffImg.
-		WritableRaster raster = (WritableRaster) buffImg.getData();
-		raster.setPixels(0, 0, width, height, img);
-		buffImg.setData(raster);
+				// We make a writable raster, write our image array to it
+				// and add the raster to buffImg.
+				WritableRaster raster = (WritableRaster) buffImg.getData();
+				raster.setPixels(0, 0, width, height, img);
+				buffImg.setData(raster);
 
-		JFrame frame = new JFrame();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				JFrame frame = new JFrame();
+				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		frame.getContentPane().setLayout(new FlowLayout());
-		frame.getContentPane().add(
-				new JLabel(new ImageIcon(
-						buffImg.getScaledInstance(
-								(int)(width*scaleFactor), (int)(height*scaleFactor), Image.SCALE_SMOOTH))));
-		frame.pack();
-		frame.setVisible(true);
+				frame.getContentPane().setLayout(new FlowLayout());
+				frame.getContentPane().add(
+						new JLabel(new ImageIcon(
+								buffImg.getScaledInstance(
+										(int)(width*scaleFactor), (int)(height*scaleFactor), Image.SCALE_SMOOTH))));
+				frame.pack();
+				frame.setVisible(true);
+				
+				return frame;
 	}
 
 }

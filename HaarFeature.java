@@ -1,5 +1,6 @@
 import java.io.File;
 
+import javax.swing.JFrame;
 
 public class HaarFeature {
 
@@ -38,7 +39,7 @@ public class HaarFeature {
 		fet.getFeatures(ind, f);
 
 		for(int i=0;i<ind.length;i++) {
-			//System.out.println(f[i]*100);
+			System.out.println(f[i]*100);
 		}
 
 		//System.out.println(System.currentTimeMillis()-startTime);
@@ -74,12 +75,17 @@ public class HaarFeature {
 		// Here we use:
 		// std^2 = mean(x^2) + mean(x)^2
 		double mean = findInt(x,y,w,w);
-		mean /= (w*w);
+		mean /= ((double)(w*w));
 
 		double meanSqr = findIntS(x,y,w,w);
-		meanSqr /= (w*w);
+		meanSqr /= ((double)(w*w));
 
-		patch_std = Math.sqrt(Math.pow(mean,2)+meanSqr);
+		if (meanSqr<=0) {
+			patch_std = 1;
+		}
+		else {
+			patch_std = Math.sqrt(Math.pow(mean,2)+meanSqr);
+		}
 	}
 
 	void getFeatures(int[] ind, double[] f) {
@@ -139,8 +145,8 @@ public class HaarFeature {
 	 */
 	private double typeI(int x, int y, int w, int h) {
 
-		double sumD = findInt(x,y,w,h);
-		double sumU = findInt(x,y+h,w,h);
+		double sumU = findInt(x,y,w,h);
+		double sumD = findInt(x,y+h,w,h);
 
 		return (sumD-sumU)/patch_std;
 	}
@@ -212,10 +218,10 @@ public class HaarFeature {
 	 */
 	private double typeIV(int x, int y, int w, int h) {
 
-		double sumLD = findInt(x,y,w,h);
-		double sumRD = findInt(x+w,y,w,h);
-		double sumLU = findInt(x,y+h,w,h);
-		double sumRU = findInt(x+w,y+h,w,h);
+		double sumLU = findInt(x,y,w,h);
+		double sumRU = findInt(x+w,y,w,h);
+		double sumLD = findInt(x,y+h,w,h);
+		double sumRD = findInt(x+w,y+h,w,h);
 
 		return (-sumLD+sumRD+sumLU-sumRU)/patch_std;
 	}
@@ -359,10 +365,10 @@ public class HaarFeature {
 		System.out.println(i/5);
 	}
 
-	static void printFeature(int ind) {
-		String black = (char)27+"[1;40m  "+(char)27+"[0m";
-		String white = (char)27+"[31;1m  "+(char)27+"[0m";
-		String gray  = (char)27+"[47;1m  "+(char)27+"[0m";
+	static double[] getFeatureImg(int ind) {
+
+		int width = MIN_PATCH_SIDE;
+		double[] img = new double[width*width];
 
 		ind *= 5;
 		int type = FEATURE_TABLE[ind];
@@ -371,20 +377,15 @@ public class HaarFeature {
 		int w = FEATURE_TABLE[ind+3];
 		int h = FEATURE_TABLE[ind+4];
 
-		System.out.println("Type: "+type+" x: "+xf+" y: "+yf+" w: "+w+" h: "+h);
-
 		switch (type) {
 		case 1:
 			for(int y=0;y<MIN_PATCH_SIDE;y++) {
 				for(int x=0;x<MIN_PATCH_SIDE;x++) {
 					if ((x>=xf && x<xf+w) && (y>=yf && y<yf+h))
-						System.out.print(black);
+						img[x + width*y] = -1;
 					else if ((x>=xf && x<xf+w) && (y>=yf+h && y<yf+2*h))
-						System.out.print(white);
-					else
-						System.out.print(gray);
+						img[x + width*y] = +1;
 				}
-				System.out.print("\n");
 			}
 			break;
 
@@ -392,13 +393,10 @@ public class HaarFeature {
 			for(int y=0;y<MIN_PATCH_SIDE;y++) {
 				for(int x=0;x<MIN_PATCH_SIDE;x++) {
 					if ((x>=xf && x<xf+w) && (y>=yf && y<yf+h))
-						System.out.print(white);
+						img[x + width*y] = +1;
 					else if ((x>=xf+w && x<xf+2*w) && (y>=yf && y<yf+h))
-						System.out.print(black);
-					else
-						System.out.print(gray);
+						img[x + width*y] = -1;
 				}
-				System.out.print("\n");
 			}
 			break;
 
@@ -406,15 +404,12 @@ public class HaarFeature {
 			for(int y=0;y<MIN_PATCH_SIDE;y++) {
 				for(int x=0;x<MIN_PATCH_SIDE;x++) {
 					if ((x>=xf && x<xf+w) && (y>=yf && y<yf+h))
-						System.out.print(white);
+						img[x + width*y] = +1;
 					else if ((x>=xf+w && x<xf+2*w) && (y>=yf && y<yf+h))
-						System.out.print(black);
+						img[x + width*y] = -1;
 					else if ((x>=xf+2*w && x<xf+3*w) && (y>=yf && y<yf+h))
-						System.out.print(white);
-					else
-						System.out.print(gray);
+						img[x + width*y] = +1;
 				}
-				System.out.print("\n");
 			}
 			break;
 
@@ -422,17 +417,14 @@ public class HaarFeature {
 			for(int y=0;y<MIN_PATCH_SIDE;y++) {
 				for(int x=0;x<MIN_PATCH_SIDE;x++) {
 					if ((x>=xf && x<xf+w) && (y>=yf && y<yf+h))
-						System.out.print(white);
+						img[x + width*y] = +1;
 					else if ((x>=xf+w && x<xf+2*w) && (y>=yf && y<yf+h))
-						System.out.print(black);
+						img[x + width*y] = -1;
 					else if ((x>=xf && x<xf+w) && (y>=yf+h && y<yf+2*h))
-						System.out.print(black);
+						img[x + width*y] = -1;
 					else if ((x>=xf+w && x<xf+2*w) && (y>=yf+h && y<yf+2*h))
-						System.out.print(white);
-					else
-						System.out.print(gray);
+						img[x + width*y] = +1;
 				}
-				System.out.print("\n");
 			}
 			break;
 
@@ -440,5 +432,29 @@ public class HaarFeature {
 			break;
 		}
 
+		return img;
+	}
+
+	static JFrame showFeatureImg(int ind) {
+		double[] img = getFeatureImg(ind);
+		return IntegralImage.showImg(img, MIN_PATCH_SIDE, MIN_PATCH_SIDE, 10);
+	}
+
+	static JFrame showClassifierImg(TrainingResult[] tr) {
+
+		double[] imgTemp = getFeatureImg(tr[0].ind);
+		int length = imgTemp.length;
+		double[] img = new double[length];
+		for(int n=0; n<tr.length; n++) {
+			if (tr[n] != null) {
+				imgTemp = getFeatureImg(tr[n].ind);
+
+				for(int i=0; i<length; i++) {
+					img[i] += imgTemp[i]*tr[n].alpha*(-tr[n].par*2+1);
+				}
+			}
+		}
+
+		return IntegralImage.showImg(img, MIN_PATCH_SIDE, MIN_PATCH_SIDE, 10);
 	}
 }

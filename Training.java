@@ -1,5 +1,7 @@
 import java.io.File;
 
+import javax.swing.JFrame;
+
 
 public class Training {
 
@@ -17,15 +19,9 @@ public class Training {
 		Training.train();
 	}
 
-	static class TrainingResult {
-		int ind;
-		int par;
-		double err;
-		double thld;
-	}
-
 	static void train() {
 		HaarFeature.init();
+		int nIter = 200;
 
 		fv_face = makeFeatureVector(
 				"D:\\Dropbox\\BIK\\pro\\TrainingImages\\FACES\\",
@@ -35,60 +31,91 @@ public class Training {
 		fv_Nface = makeFeatureVector(
 				"D:\\Dropbox\\BIK\\pro\\TrainingImages\\NFACES\\",
 				10000);
-		nNFaces = fv_face.length;
+		nNFaces = fv_Nface.length;
 
-		double [] w_face = new double[nFaces];
-		double [] w_Nface = new double[nNFaces];
-		initWeights(w_face,1/(2*(double)nFaces));
-		initWeights(w_Nface,1/(2*(double)nNFaces));
+		double[] w_face = new double[nFaces];
+		double[] w_Nface = new double[nNFaces];
+		initWeights(w_face,1/(2*((double)nFaces)));
+		initWeights(w_Nface,1/(2*((double)nNFaces)));
 
-		double [] mu_p = new double[nFeat];
-		double [] mu_n = new double[nFeat];
-		double [] thld = new double[nFeat];
-		double [][] err_face   = new double[nFeat][2];
-		double [][] err_Nface  = new double[nFeat][2];
+		double[] mu_p = new double[nFeat];
+		double[] mu_n = new double[nFeat];
+		double[] thld = new double[nFeat];
+		int[] p = new int[nFeat];
+		double[] err_face   = new double[nFeat];
+		double[] err_Nface  = new double[nFeat];
 		double sum_p;
 		double sum_n;
-		TrainingResult tr;
+		TrainingResult[] tr = new TrainingResult[nIter];
+		JFrame frame = null;
 
-		for (int n=0;n<10;n++) {
+		for (int n=0;n<nIter;n++) {
+
 			long startTime = System.currentTimeMillis();
 
 			sum_p = weightedMean(w_face, fv_face, nFaces, mu_p);
 			sum_n = weightedMean(w_Nface, fv_Nface, nNFaces, mu_n);
-			setThreshold(mu_p,mu_n,thld);
+			setThreshold(mu_p,mu_n,thld,p);
 
-			setError(w_face, fv_face, nFaces, thld, err_face);
-			setError(w_Nface, fv_Nface, nNFaces, thld, err_Nface);
+			setError(w_face, fv_face, nFaces, thld, p, err_face, 1);
+			setError(w_Nface, fv_Nface, nNFaces, thld, p, err_Nface, 0);
 
-			tr = getOptimal(w_face, err_face, sum_p,
+			tr[n] = getOptimal(w_face, err_face, sum_p,
 					w_Nface, err_Nface, sum_n);
-			tr.thld = thld[tr.ind];
+			tr[n].thld = thld[tr[n].ind];
+			tr[n].par  = p[tr[n].ind];
 
-			HaarFeature.printFeature(tr.ind);
+			updateWeights(w_face, fv_face, nFaces, tr[n], 1);
+			updateWeights(w_Nface, fv_Nface, nNFaces, tr[n], 0);
+
+			if (frame != null) {
+				frame.setVisible(false);
+				frame.dispose();
+			}
+//			frame = HaarFeature.showFeatureImg(tr[n].ind);
+			frame = HaarFeature.showClassifierImg(tr);
+			System.out.println("\nFeature no: "+n);
+			System.out.println("True positives: "+testClassifier(fv_face, nFaces, tr)*100/nFaces+"%");
+			System.out.println("False positives: "+testClassifier(fv_Nface, nNFaces, tr)*100/nNFaces+"%");
 			System.out.println((System.currentTimeMillis()-startTime)/1000);
-
-			updateWeights(w_face, fv_face, nFaces, tr, 0);
-			updateWeights(w_Nface, fv_Nface, nNFaces, tr, 1);
 		}
 	}
 
-	static void updateWeights(double[] w, double[][] f, int n, TrainingResult tr, int inv) {
+	static int testClassifier(double[][] f, int n, TrainingResult[] tr) {
 
-		double beta = tr.err/(1-tr.err);
+		int sumDetection = 0;
+		// Loop over files
+		for (int i=0;i<n;i++) {
 
-		if((tr.par+inv)%2==0) {
-			for (int i=0;i<n;i++) {
-				if (f[i][tr.ind]<tr.thld) {
-					w[i] *= beta;	
+			double sumH = 0;
+			double sumA = 0;
+			for(int j=0;j<tr.length;j++) {
+				if(tr[j] == null) {
+					break;
 				}
+				if(f[i][tr[j].ind]*(-2*tr[j].par+1) > tr[j].thld*(-2*tr[j].par+1)) {
+					sumH += tr[j].alpha;
+				}
+				sumA += tr[j].alpha;
+			}
+			if(sumH>=sumA/2) {
+				sumDetection++;
 			}
 		}
-		else {
-			for (int i=0;i<n;i++) {
-				if (f[i][tr.ind]>tr.thld) {
-					w[i] *= beta;	
-				}
+		return sumDetection;
+	}
+
+	static void updateWeights(double[] w, double[][] f, int n, TrainingResult tr, int pos) {
+
+		double beta = tr.err/(1-tr.err);
+		tr.alpha = Math.log(1/beta);
+
+		for (int i=0;i<n;i++) {
+			if (tr.par == (pos+1)%2 && f[i][tr.ind]>tr.thld) {
+				w[i] *= beta;
+			}
+			else if (tr.par == (pos)%2 && f[i][tr.ind]<tr.thld) {
+				w[i] *= beta;
 			}
 		}
 	}
@@ -100,28 +127,18 @@ public class Training {
 	}
 
 	static TrainingResult getOptimal(
-			double[] w_face, double[][] err_face, double sum_p,
-			double[] w_Nface, double[][] err_Nface, double sum_n) {
+			double[] w_face, double[] err_face, double sum_p,
+			double[] w_Nface, double[] err_Nface, double sum_n) {
 
 		TrainingResult tr = new TrainingResult();
 		double minErr = Double.MAX_VALUE;
 		double err;
 
 		for (int j=0;j<nFeat;j++) {
-			err = (err_face[j][0]+err_Nface[j][1]);
+			err = (err_face[j]+err_Nface[j]);
 			if(err<minErr) {
 				minErr = err;
 				tr.ind = j;
-				tr.par = 0;
-			}
-		}
-
-		for (int j=0;j<nFeat;j++) {
-			err = (err_face[j][1]+err_Nface[j][0]);
-			if(err<minErr) {
-				minErr = err;
-				tr.ind = j;
-				tr.par = 1;
 			}
 		}
 
@@ -129,20 +146,19 @@ public class Training {
 		return tr;
 	}
 
-	static void setError(double[] w, double[][] f, int n, double[] thld, double[][] err) {
+	static void setError(double[] w, double[][] f, int n, double[] thld, int[] p, double[] err, int pos) {
 
 		for (int j=0;j<nFeat;j++) {
 
-			err[j][0] = 0;
-			err[j][1] = 0;
+			err[j] = 0;
 
 			for (int i=0;i<n;i++) {
 
-				if (f[i][j]>thld[j]) {
-					err[j][0] += w[i];
+				if (p[j] == (pos+1)%2 && f[i][j]<thld[j]) {
+					err[j] += w[i];
 				}
-				else {
-					err[j][1] += w[i];
+				else if (p[j] == (pos)%2 && f[i][j]>thld[j]) {
+					err[j] += w[i];
 				}	
 			}
 		}	
@@ -153,9 +169,15 @@ public class Training {
 	 * the threshold lies between the mean of the positive
 	 * and negative examples.
 	 */
-	static void setThreshold(double[] mu_p, double[] mu_n, double[] thld) {
+	static void setThreshold(double[] mu_p, double[] mu_n, double[] thld, int[] p) {
 		for (int j=0;j<nFeat;j++) {
 			thld[j] = (mu_p[j]+mu_n[j])/2;
+			if(mu_p[j]>mu_n[j]) {
+				p[j] = 0;
+			}
+			else {
+				p[j] = 1;
+			}
 		}
 	}
 
