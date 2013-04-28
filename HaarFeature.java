@@ -126,7 +126,7 @@ public class HaarFeature {
 			return typeIV(x, y, w, h);
 		default:
 			System.out.println("Tried to use feature type: "+ind);
-			return 0;
+			return Double.NaN;
 		}
 	}
 
@@ -450,7 +450,7 @@ public class HaarFeature {
 				imgTemp = getFeatureImg(tr[n].ind);
 
 				for(int i=0; i<length; i++) {
-					img[i] += imgTemp[i]*tr[n].alpha*(-tr[n].par*2+1);
+					img[i] += tr[n].par*imgTemp[i]*tr[n].alpha;
 				}
 			}
 		}

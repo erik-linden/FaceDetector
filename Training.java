@@ -6,10 +6,6 @@ import javax.swing.JFrame;
 public class Training {
 
 	static int nFeat = HaarFeature.NO_FEATURES;
-	static int nFaces;
-	static int nNFaces;
-	static double[][] fv_face;
-	static double[][] fv_Nface;
 
 	/**
 	 * @param args
@@ -23,20 +19,20 @@ public class Training {
 		HaarFeature.init();
 		int nIter = 200;
 
-		fv_face = makeFeatureVector(
+		double[] fv_face = makeFeatureVector(
 				"D:\\Dropbox\\BIK\\pro\\TrainingImages\\FACES\\",
-				10000);
-		nFaces = fv_face.length;
+				40000);
+		int nFaces = fv_face.length/nFeat;
 
-		fv_Nface = makeFeatureVector(
+		double[] fv_Nface = makeFeatureVector(
 				"D:\\Dropbox\\BIK\\pro\\TrainingImages\\NFACES\\",
-				10000);
-		nNFaces = fv_Nface.length;
+				40000);
+		int nNFaces = fv_Nface.length/nFeat;
 
 		double[] w_face = new double[nFaces];
 		double[] w_Nface = new double[nNFaces];
-		initWeights(w_face,1/(2*((double)nFaces)));
-		initWeights(w_Nface,1/(2*((double)nNFaces)));
+		initWeights(w_face, nFaces, 1/(2*((double)nFaces)));
+		initWeights(w_Nface, nNFaces, 1/(2*((double)nNFaces)));
 
 		double[] mu_p = new double[nFeat];
 		double[] mu_n = new double[nFeat];
@@ -57,34 +53,35 @@ public class Training {
 			sum_n = weightedMean(w_Nface, fv_Nface, nNFaces, mu_n);
 			setThreshold(mu_p,mu_n,thld,p);
 
-			setError(w_face, fv_face, nFaces, thld, p, err_face, 1);
-			setError(w_Nface, fv_Nface, nNFaces, thld, p, err_Nface, 0);
+			setError(w_face, fv_face, nFaces,
+					 thld, p, err_face, true);
+			setError(w_Nface, fv_Nface, nNFaces,
+					 thld, p, err_Nface, false);
 
 			tr[n] = getOptimal(w_face, err_face, sum_p,
-					w_Nface, err_Nface, sum_n);
+					   		   w_Nface, err_Nface, sum_n);
 			tr[n].thld = thld[tr[n].ind];
 			tr[n].par  = p[tr[n].ind];
 
-			updateWeights(w_face, fv_face, nFaces, tr[n], 1);
-			updateWeights(w_Nface, fv_Nface, nNFaces, tr[n], 0);
+			updateWeights(w_face, fv_face, nFaces, tr[n], true);
+			updateWeights(w_Nface, fv_Nface, nNFaces, tr[n], false);
 
-			if (frame != null) {
-				frame.setVisible(false);
-				frame.dispose();
-			}
+//			if (frame != null) {
+//				frame.setVisible(false);
+//				frame.dispose();
+//			}
 //			frame = HaarFeature.showFeatureImg(tr[n].ind);
-			frame = HaarFeature.showClassifierImg(tr);
+//			frame = HaarFeature.showClassifierImg(tr);
 			System.out.println("\nFeature no: "+n);
-			System.out.println("True positives: "+testClassifier(fv_face, nFaces, tr)*100/nFaces+"%");
-			System.out.println("False positives: "+testClassifier(fv_Nface, nNFaces, tr)*100/nNFaces+"%");
-			System.out.println((System.currentTimeMillis()-startTime)/1000);
+			System.out.println("True positives: "+testClassifier(fv_face, nFaces, tr)*1000/nFaces+"%%");
+			System.out.println("False positives: "+testClassifier(fv_Nface, nNFaces, tr)*1000/nNFaces+"%%");
+			System.out.println((System.currentTimeMillis()-startTime));
 		}
 	}
 
-	static int testClassifier(double[][] f, int n, TrainingResult[] tr) {
+	static int testClassifier(double[] f, int n, TrainingResult[] tr) {
 
 		int sumDetection = 0;
-		// Loop over files
 		for (int i=0;i<n;i++) {
 
 			double sumH = 0;
@@ -93,7 +90,7 @@ public class Training {
 				if(tr[j] == null) {
 					break;
 				}
-				if(f[i][tr[j].ind]*(-2*tr[j].par+1) > tr[j].thld*(-2*tr[j].par+1)) {
+				if(tr[j].par*f[i*nFeat+tr[j].ind] > tr[j].par*tr[j].thld) {
 					sumH += tr[j].alpha;
 				}
 				sumA += tr[j].alpha;
@@ -105,27 +102,43 @@ public class Training {
 		return sumDetection;
 	}
 
-	static void updateWeights(double[] w, double[][] f, int n, TrainingResult tr, int pos) {
-
+	/*
+	 * Lowers the weight on correctly classified training data.
+	 */
+	static void updateWeights(double[] w, double[] f, int n,
+			TrainingResult tr, boolean pos) {
+		
 		double beta = tr.err/(1-tr.err);
 		tr.alpha = Math.log(1/beta);
 
+		// Loop over files.
 		for (int i=0;i<n;i++) {
-			if (tr.par == (pos+1)%2 && f[i][tr.ind]>tr.thld) {
+			
+			// True positive.
+			if (pos && tr.par*f[i*nFeat+tr.ind]>tr.par*tr.thld) {
 				w[i] *= beta;
 			}
-			else if (tr.par == (pos)%2 && f[i][tr.ind]<tr.thld) {
+			
+			// True negative.
+			else if (!pos && tr.par*f[i*nFeat+tr.ind]<tr.par*tr.thld) {
 				w[i] *= beta;
 			}
 		}
 	}
 
-	static void initWeights(double[] w, double value) {
-		for (int j=0;j<w.length;j++) {
+	/*
+	 * Sets all weights to some starting value.
+	 */
+	static void initWeights(double[] w, int n, double value) {
+		for (int j=0;j<n;j++) {
 			w[j] = value;
 		}
 	}
 
+	/*
+	 * Finds the weak classifier that minimizes the total error
+	 * on the two training sets.
+	 */
 	static TrainingResult getOptimal(
 			double[] w_face, double[] err_face, double sum_p,
 			double[] w_Nface, double[] err_Nface, double sum_n) {
@@ -134,7 +147,10 @@ public class Training {
 		double minErr = Double.MAX_VALUE;
 		double err;
 
+		// Loop over features.
 		for (int j=0;j<nFeat;j++) {
+			
+			// Find minimum total error.
 			err = (err_face[j]+err_Nface[j]);
 			if(err<minErr) {
 				minErr = err;
@@ -142,22 +158,37 @@ public class Training {
 			}
 		}
 
+		// The error should be computed with
+		// normalized weights.
 		tr.err = minErr/(sum_p+sum_n);
 		return tr;
 	}
 
-	static void setError(double[] w, double[][] f, int n, double[] thld, int[] p, double[] err, int pos) {
+	/*
+	 *  Finds the weighted error for each weak classifier.
+	 */
+	static void setError(double[] w, double[] f, int n,
+			double[] thld, int[] p, 
+			double[] err, boolean pos) {
 
+		// Start by zeroing all errors.
 		for (int j=0;j<nFeat;j++) {
-
 			err[j] = 0;
-
-			for (int i=0;i<n;i++) {
-
-				if (p[j] == (pos+1)%2 && f[i][j]<thld[j]) {
+		}	
+		
+		// Loop over files.
+		for(int i=0;i<n;i++)  {
+			
+			// Loop over features.
+			for (int j=0;j<nFeat;j++) {
+				
+				// If a positive example fails detection.
+				if (pos && p[j]*f[i*nFeat+j]<p[j]*thld[j]) {
 					err[j] += w[i];
 				}
-				else if (p[j] == (pos)%2 && f[i][j]>thld[j]) {
+				
+				// If a negative example is detected.
+				else if (!pos && p[j]*f[i*nFeat+j]>p[j]*thld[j]) {
 					err[j] += w[i];
 				}	
 			}
@@ -169,14 +200,20 @@ public class Training {
 	 * the threshold lies between the mean of the positive
 	 * and negative examples.
 	 */
-	static void setThreshold(double[] mu_p, double[] mu_n, double[] thld, int[] p) {
+	static void setThreshold(double[] mu_p, double[] mu_n,
+			double[] thld, int[] p) {
+		
+		// Loop over all features.
 		for (int j=0;j<nFeat;j++) {
 			thld[j] = (mu_p[j]+mu_n[j])/2;
+			
+			// Heuristics (good) for setting
+			// the parity.
 			if(mu_p[j]>mu_n[j]) {
-				p[j] = 0;
+				p[j] = 1;
 			}
 			else {
-				p[j] = 1;
+				p[j] = -1;
 			}
 		}
 	}
@@ -189,7 +226,7 @@ public class Training {
 	 * The function returns the sum of the 
 	 * weights.
 	 */
-	static double weightedMean(double[] w, double[][] f, int n, double[] mu) {
+	static double weightedMean(double[] w, double[] f, int n, double[] mu) {
 
 		// Set everything to zero
 		double sum = 0;
@@ -202,9 +239,10 @@ public class Training {
 
 			// Loop over features
 			for (int j=0;j<nFeat;j++) {
-				mu[j] += w[i]*f[i][j];
+				mu[j] += w[i]*f[i*nFeat+j];
 			}
 
+			// Sum the weights
 			sum += w[i];
 		}
 
@@ -218,22 +256,22 @@ public class Training {
 
 	/*
 	 * Returns an nFiles-by-nFeat array of features
-	 * for all files in the specified dir.
+	 * for at most nMax files in the specified dir.
 	 */
-	static double[][] makeFeatureVector(String dir, int nMax) {; 
+	static double[] makeFeatureVector(String dir, int nMax) {; 
 
 	File folder = new File(dir);
 	File[] listOfFiles = folder.listFiles();
+	
 	int nFiles = Math.min(listOfFiles.length,nMax);
-
-	double[][] fv = new double[nFiles][nFeat];
+	double[] fv = new double[nFiles*nFeat];
 
 	for(int fileNo=0;fileNo<nFiles;fileNo++) {
 		IntegralImage img = new IntegralImage(listOfFiles[fileNo]);
 		HaarFeature fet = new HaarFeature(img);
 
 		for(int ind=0;ind<nFeat;ind++) {
-			fv[fileNo][ind] = fet.computeFeature(ind);
+			fv[fileNo*nFeat+ind] = fet.computeFeature(ind);
 		}
 	}
 
