@@ -1,4 +1,9 @@
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.Vector;
 
 import javax.swing.JFrame;
 
@@ -12,21 +17,31 @@ public class Training {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		Training.train();
+		Vector<WeakClassifier> tr = Training.train();
+		try {
+			FileOutputStream saveFile = new FileOutputStream("trainingData.sav");
+			ObjectOutputStream save = new ObjectOutputStream(saveFile);
+			save.writeObject(tr);
+			save.close();
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
-	static void train() {
+	static Vector train() {
 		HaarFeature.init();
 		int nIter = 200;
 
 		double[] fv_face = makeFeatureVector(
 				"D:\\Dropbox\\BIK\\pro\\TrainingImages\\FACES\\",
-				40000);
+				10000);
 		int nFaces = fv_face.length/nFeat;
 
 		double[] fv_Nface = makeFeatureVector(
 				"D:\\Dropbox\\BIK\\pro\\TrainingImages\\NFACES\\",
-				40000);
+				10000);
 		int nNFaces = fv_Nface.length/nFeat;
 
 		double[] w_face = new double[nFaces];
@@ -42,7 +57,8 @@ public class Training {
 		double[] err_Nface  = new double[nFeat];
 		double sum_p;
 		double sum_n;
-		TrainingResult[] tr = new TrainingResult[nIter];
+		TrainingResult tr;
+		Vector<WeakClassifier> classifier = new Vector<>();
 		JFrame frame = null;
 
 		for (int n=0;n<nIter;n++) {
@@ -58,13 +74,16 @@ public class Training {
 			setError(w_Nface, fv_Nface, nNFaces,
 					 thld, p, err_Nface, false);
 
-			tr[n] = getOptimal(w_face, err_face, sum_p,
+			tr = getOptimal(w_face, err_face, sum_p,
 					   		   w_Nface, err_Nface, sum_n);
-			tr[n].thld = thld[tr[n].ind];
-			tr[n].par  = p[tr[n].ind];
+			tr.thld = thld[tr.ind];
+			tr.par  = p[tr.ind];
+			
+			updateWeights(w_face, fv_face, nFaces, tr, true);
+			updateWeights(w_Nface, fv_Nface, nNFaces, tr, false);
+			
+			classifier.add(new WeakClassifier(tr.ind,tr.thld,tr.par,tr.alpha));
 
-			updateWeights(w_face, fv_face, nFaces, tr[n], true);
-			updateWeights(w_Nface, fv_Nface, nNFaces, tr[n], false);
 
 //			if (frame != null) {
 //				frame.setVisible(false);
@@ -73,27 +92,26 @@ public class Training {
 //			frame = HaarFeature.showFeatureImg(tr[n].ind);
 //			frame = HaarFeature.showClassifierImg(tr);
 			System.out.println("\nFeature no: "+n);
-			System.out.println("True positives: "+testClassifier(fv_face, nFaces, tr)*1000/nFaces+"%%");
-			System.out.println("False positives: "+testClassifier(fv_Nface, nNFaces, tr)*1000/nNFaces+"%%");
+			System.out.println("True positives: "+testClassifier(fv_face, nFaces, classifier)*1000/nFaces+"%%");
+			System.out.println("False positives: "+testClassifier(fv_Nface, nNFaces, classifier)*1000/nNFaces+"%%");
 			System.out.println((System.currentTimeMillis()-startTime));
 		}
+		
+		return classifier;
 	}
 
-	static int testClassifier(double[] f, int n, TrainingResult[] tr) {
+	static int testClassifier(double[] f, int n, Vector<WeakClassifier> classifier) {
 
 		int sumDetection = 0;
 		for (int i=0;i<n;i++) {
 
 			double sumH = 0;
 			double sumA = 0;
-			for(int j=0;j<tr.length;j++) {
-				if(tr[j] == null) {
-					break;
+			for(WeakClassifier c : classifier) {
+				if(c.parity*f[i*nFeat+c.index] > c.parity*c.thld) {
+					sumH += c.alpha;
 				}
-				if(tr[j].par*f[i*nFeat+tr[j].ind] > tr[j].par*tr[j].thld) {
-					sumH += tr[j].alpha;
-				}
-				sumA += tr[j].alpha;
+				sumA += c.alpha;
 			}
 			if(sumH>=sumA/2) {
 				sumDetection++;
