@@ -73,7 +73,7 @@ public class HaarFeature {
 		patch_scale = ((double)w)/((double)MIN_PATCH_SIDE);
 
 		// Here we use:
-		// std^2 = mean(x^2) + mean(x)^2
+		// std^2 = mean(x^2) - mean(x)^2
 		double mean = findInt(x,y,w,w);
 		mean /= ((double)(w*w));
 
@@ -84,7 +84,7 @@ public class HaarFeature {
 			patch_std = 1;
 		}
 		else {
-			patch_std = Math.sqrt(Math.pow(mean,2)+meanSqr);
+			patch_std = Math.sqrt(meanSqr-Math.pow(mean,2));
 		}
 	}
 
@@ -362,7 +362,6 @@ public class HaarFeature {
 				}
 			}
 		}
-		System.out.println(i/5);
 	}
 
 	static double[] getFeatureImg(int ind) {
