@@ -138,7 +138,7 @@ public class IntegralImage {
 		// to normalize the image patch.
 		double mean = integralImage[width*height-1]/(width*height);
 		double meanSqr = squareIntegralImage[width*height-1]/(width*height);
-		double std = Math.sqrt(Math.pow(mean,2)+meanSqr);
+		double std = Math.sqrt(meanSqr-Math.pow(mean,2));
 
 		for(int y = 0; y<height;y++) {
 			for(int x = 0; x<width;x++) {
