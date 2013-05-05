@@ -74,8 +74,8 @@ public class HaarFeature {
 
 		// Here we use:
 		// std^2 = mean(x^2) - mean(x)^2
-		double mean = findInt(x,y,w,w);
-		mean /= ((double)(w*w));
+		patch_mean = findInt(x,y,w,w);
+		patch_mean /= ((double)(w*w));
 
 		double meanSqr = findIntS(x,y,w,w);
 		meanSqr /= ((double)(w*w));
@@ -84,7 +84,7 @@ public class HaarFeature {
 			patch_std = 1;
 		}
 		else {
-			patch_std = Math.sqrt(meanSqr-Math.pow(mean,2));
+			patch_std = Math.sqrt(meanSqr-Math.pow(patch_mean,2));
 		}
 	}
 
@@ -143,7 +143,7 @@ public class HaarFeature {
 	 * @param h
 	 * @return
 	 */
-	private double typeI(int x, int y, int w, int h) {
+	double typeI(int x, int y, int w, int h) {
 
 		double sumU = findInt(x,y,w,h);
 		double sumD = findInt(x,y+h,w,h);
@@ -165,7 +165,7 @@ public class HaarFeature {
 	 * @param h
 	 * @return
 	 */
-	private double typeII(int x, int y, int w, int h) {
+	double typeII(int x, int y, int w, int h) {
 
 		double sumL = findInt(x,y,w,h);
 		double sumR = findInt(x+w,y,w,h);
@@ -187,7 +187,7 @@ public class HaarFeature {
 	 * @param h
 	 * @return
 	 */
-	private double typeIII(int x, int y, int w, int h) {
+	double typeIII(int x, int y, int w, int h) {
 
 		double sumL = findInt(x,y,w,h);
 		double sumC = findInt(x+w,y,w,h);
@@ -216,7 +216,7 @@ public class HaarFeature {
 	 * @param h
 	 * @return
 	 */
-	private double typeIV(int x, int y, int w, int h) {
+	double typeIV(int x, int y, int w, int h) {
 
 		double sumLU = findInt(x,y,w,h);
 		double sumRU = findInt(x+w,y,w,h);
