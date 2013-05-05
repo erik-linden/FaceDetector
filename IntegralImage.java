@@ -16,11 +16,11 @@ public class IntegralImage {
 	/**
 	 * The integral image source image
 	 */
-	public double[] integralImage;
+	private double[] integralImage;
 	/**
 	 * The integral image of the squared source image
 	 */
-	public double[] squareIntegralImage;
+	private double[] squareIntegralImage;
 	public int width;
 	public int height;
 
