@@ -278,22 +278,22 @@ public class Training {
 	 */
 	static double[] makeFeatureVector(String dir, int nMax) {; 
 
-	File folder = new File(dir);
-	File[] listOfFiles = folder.listFiles();
-	
-	int nFiles = Math.min(listOfFiles.length,nMax);
-	double[] fv = new double[nFiles*nFeat];
+        File folder = new File(dir);
+        File[] listOfFiles = folder.listFiles();
 
-	for(int fileNo=0;fileNo<nFiles;fileNo++) {
-		IntegralImage img = new IntegralImage(listOfFiles[fileNo]);
-		HaarFeature fet = new HaarFeature(img);
+        int nFiles = Math.min(listOfFiles.length, nMax);
+        double[] fv = new double[nFiles * nFeat];
 
-		for(int ind=0;ind<nFeat;ind++) {
-			fv[fileNo*nFeat+ind] = fet.computeFeature(ind);
-		}
-	}
+        for(int fileNo = 0; fileNo < nFiles; fileNo++) {
+            IntegralImage img = new IntegralImage(listOfFiles[fileNo]);
+            HaarFeature fet = new HaarFeature(img);
 
-	return fv;
+            for(int ind = 0; ind < nFeat; ind++) {
+                fv[fileNo * nFeat + ind] = fet.computeFeature(ind);
+            }
+        }
+
+        return fv;
 	}
 
 }
