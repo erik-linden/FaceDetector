@@ -1,4 +1,5 @@
 import java.io.File;
+import java.util.Vector;
 
 import javax.swing.JFrame;
 
@@ -439,18 +440,16 @@ public class HaarFeature {
 		return IntegralImage.showImg(img, MIN_PATCH_SIDE, MIN_PATCH_SIDE, 10);
 	}
 
-	static JFrame showClassifierImg(TrainingResult[] tr) {
+	static JFrame showClassifierImg(Vector<WeakClassifier> classifier) {
 
-		double[] imgTemp = getFeatureImg(tr[0].ind);
+		double[] imgTemp = getFeatureImg(classifier.get(0).index);
 		int length = imgTemp.length;
 		double[] img = new double[length];
-		for(int n=0; n<tr.length; n++) {
-			if (tr[n] != null) {
-				imgTemp = getFeatureImg(tr[n].ind);
+		for(WeakClassifier c: classifier) {
+			imgTemp = getFeatureImg(c.index);
 
-				for(int i=0; i<length; i++) {
-					img[i] += tr[n].par*imgTemp[i]*tr[n].alpha;
-				}
+			for(int i=0; i<length; i++) {
+				img[i] += c.parity*imgTemp[i]*c.alpha;
 			}
 		}
 
