@@ -90,7 +90,7 @@ public class Training {
 //				frame.dispose();
 //			}
 //			frame = HaarFeature.showFeatureImg(tr[n].ind);
-//			frame = HaarFeature.showClassifierImg(tr);
+			frame = HaarFeature.showClassifierImg(classifier);
 			System.out.println("\nFeature no: "+n);
 			System.out.println("True positives: "+testClassifier(fv_face, nFaces, classifier)*1000/nFaces+"%%");
 			System.out.println("False positives: "+testClassifier(fv_Nface, nNFaces, classifier)*1000/nNFaces+"%%");
