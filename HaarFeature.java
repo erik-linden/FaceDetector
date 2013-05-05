@@ -24,7 +24,7 @@ public class HaarFeature {
 		HaarFeature.init();
 		long startTime = System.currentTimeMillis();
 
-		File file = new File("D:\\Dropbox\\BIK\\pro\\TrainingImages\\FACES\\face00001.bmp");
+		File file = new File(FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages","FACES","face00001.bmp"));
 		IntegralImage img = new IntegralImage(file);
 		HaarFeature fet = new HaarFeature(img);
 
