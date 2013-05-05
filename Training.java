@@ -35,12 +35,12 @@ public class Training {
 		int nIter = 200;
 
 		double[] fv_face = makeFeatureVector(
-				"D:\\Dropbox\\BIK\\pro\\TrainingImages\\FACES\\",
+		        FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages", "FACES"),
 				10000);
 		int nFaces = fv_face.length/nFeat;
 
 		double[] fv_Nface = makeFeatureVector(
-				"D:\\Dropbox\\BIK\\pro\\TrainingImages\\NFACES\\",
+		        FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages", "NFACES"),
 				10000);
 		int nNFaces = fv_Nface.length/nFeat;
 
