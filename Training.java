@@ -85,10 +85,10 @@ public class Training {
 			classifier.add(new WeakClassifier(tr.ind,tr.thld,tr.par,tr.alpha));
 
 
-//			if (frame != null) {
-//				frame.setVisible(false);
-//				frame.dispose();
-//			}
+			if (frame != null) {
+				frame.setVisible(false);
+				frame.dispose();
+			}
 //			frame = HaarFeature.showFeatureImg(tr[n].ind);
 			frame = HaarFeature.showClassifierImg(classifier);
 			System.out.println("\nFeature no: "+n);
