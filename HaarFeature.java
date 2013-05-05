@@ -110,7 +110,11 @@ public class HaarFeature {
 		int w = FEATURE_TABLE[ind+3];
 		int h = FEATURE_TABLE[ind+4];
 
-		// Scale the feature to fit the current patch.
+		return computeFeature(type, x, y, w, h);
+	}
+
+    double computeFeature(int type, int x, int y, int w, int h) {
+        // Scale the feature to fit the current patch.
 		x = (int) Math.round(origin_x + x*patch_scale);
 		y = (int) Math.round(origin_y + y*patch_scale);
 		w = (int) Math.round(w*patch_scale);
@@ -126,10 +130,10 @@ public class HaarFeature {
 		case 4:
 			return typeIV(x, y, w, h);
 		default:
-			System.out.println("Tried to use feature type: "+ind);
+			System.out.println(String.format("Tried to use feature type: %d x=%d y=%d w=%d h=%d", type, x, y, w, h));
 			return Double.NaN;
 		}
-	}
+    }
 
 	/**
 	 * Type I feature:
@@ -367,15 +371,19 @@ public class HaarFeature {
 
 	static double[] getFeatureImg(int ind) {
 
-		int width = MIN_PATCH_SIDE;
-		double[] img = new double[width*width];
+	    ind *= 5;
+	    int type = FEATURE_TABLE[ind];
+	    int xf = FEATURE_TABLE[ind+1];
+	    int yf = FEATURE_TABLE[ind+2];
+	    int w = FEATURE_TABLE[ind+3];
+	    int h = FEATURE_TABLE[ind+4];
 
-		ind *= 5;
-		int type = FEATURE_TABLE[ind];
-		int xf = FEATURE_TABLE[ind+1];
-		int yf = FEATURE_TABLE[ind+2];
-		int w = FEATURE_TABLE[ind+3];
-		int h = FEATURE_TABLE[ind+4];
+		return getFeatureImg(type, xf, yf, w, h);
+	}
+
+    private static double[] getFeatureImg(int type, int xf, int yf, int w, int h) {
+        int width = MIN_PATCH_SIDE;
+		double[] img = new double[width*width];
 
 		switch (type) {
 		case 1:
@@ -433,7 +441,7 @@ public class HaarFeature {
 		}
 
 		return img;
-	}
+    }
 
 	static JFrame showFeatureImg(int ind) {
 		double[] img = getFeatureImg(ind);

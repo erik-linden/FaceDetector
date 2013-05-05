@@ -29,21 +29,6 @@ public class Debug3 {
         int nFiles = 100;
         double fs[] = new double[nFiles];
 
-        int ind = -1;
-        HaarFeature.init();
-
-        // Find the index of the feature stated above
-        for(int i = 0; i < HaarFeature.NO_FEATURES; ++i) {
-            if(HaarFeature.FEATURE_TABLE[i * 5] == type
-                    && HaarFeature.FEATURE_TABLE[i * 5 + 1] == x
-                    && HaarFeature.FEATURE_TABLE[i * 5 + 2] == y
-                    && HaarFeature.FEATURE_TABLE[i * 5 + 3] == w
-                    && HaarFeature.FEATURE_TABLE[i * 5 + 4] == h) {
-                ind = i;
-                break;
-            }
-        }
-
         for(int fileNo = 0; fileNo < nFiles; fileNo++) {
             File file =
                     new File(FileUtils.combinePath(
@@ -53,7 +38,7 @@ public class Debug3 {
             IntegralImage img = new IntegralImage(file);
             HaarFeature fet = new HaarFeature(img);
 
-            fs[fileNo] = fet.computeFeature(ind);
+            fs[fileNo] = fet.computeFeature(type, x, y, w, h);
         }
 
         double epsilon = 1E-1;
