@@ -34,15 +34,15 @@ public class Training {
 		HaarFeature.init();
 		int nIter = 200;
 
-		double[] fv_face = makeFeatureVector(
+		double[][] fv_face = makeFeatureVector(
 		        FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages", "FACES"),
 				10000);
-		int nFaces = fv_face.length/nFeat;
+		int nFaces = fv_face.length;
 
-		double[] fv_Nface = makeFeatureVector(
+		double[][] fv_Nface = makeFeatureVector(
 		        FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages", "NFACES"),
 				10000);
-		int nNFaces = fv_Nface.length/nFeat;
+		int nNFaces = fv_Nface.length;
 
 		double[] w_face = new double[nFaces];
 		double[] w_Nface = new double[nNFaces];
@@ -100,7 +100,7 @@ public class Training {
 		return classifier;
 	}
 
-	static int testClassifier(double[] f, int n, Vector<WeakClassifier> classifier) {
+	static int testClassifier(double[][] fv_face, int n, Vector<WeakClassifier> classifier) {
 
 		int sumDetection = 0;
 		for (int i=0;i<n;i++) {
@@ -108,7 +108,7 @@ public class Training {
 			double sumH = 0;
 			double sumA = 0;
 			for(WeakClassifier c : classifier) {
-				if(c.parity*f[i*nFeat+c.index] > c.parity*c.thld) {
+				if(c.parity*fv_face[i][c.index] > c.parity*c.thld) {
 					sumH += c.alpha;
 				}
 				sumA += c.alpha;
@@ -123,7 +123,7 @@ public class Training {
 	/*
 	 * Lowers the weight on correctly classified training data.
 	 */
-	static void updateWeights(double[] w, double[] f, int n,
+	static void updateWeights(double[] w, double[][] fv_face, int n,
 			TrainingResult tr, boolean pos) {
 		
 		double beta = tr.err/(1-tr.err);
@@ -133,12 +133,12 @@ public class Training {
 		for (int i=0;i<n;i++) {
 			
 			// True positive.
-			if (pos && tr.par*f[i*nFeat+tr.ind]>tr.par*tr.thld) {
+			if (pos && tr.par*fv_face[i][tr.ind]>tr.par*tr.thld) {
 				w[i] *= beta;
 			}
 			
 			// True negative.
-			else if (!pos && tr.par*f[i*nFeat+tr.ind]<tr.par*tr.thld) {
+			else if (!pos && tr.par*fv_face[i][tr.ind]<tr.par*tr.thld) {
 				w[i] *= beta;
 			}
 		}
@@ -185,7 +185,7 @@ public class Training {
 	/*
 	 *  Finds the weighted error for each weak classifier.
 	 */
-	static void setError(double[] w, double[] f, int n,
+	static void setError(double[] w, double[][] fv_face, int n,
 			double[] thld, int[] p, 
 			double[] err, boolean pos) {
 
@@ -201,12 +201,12 @@ public class Training {
 			for (int j=0;j<nFeat;j++) {
 				
 				// If a positive example fails detection.
-				if (pos && p[j]*f[i*nFeat+j]<p[j]*thld[j]) {
+				if (pos && p[j]*fv_face[i][j]<p[j]*thld[j]) {
 					err[j] += w[i];
 				}
 				
 				// If a negative example is detected.
-				else if (!pos && p[j]*f[i*nFeat+j]>p[j]*thld[j]) {
+				else if (!pos && p[j]*fv_face[i][j]>p[j]*thld[j]) {
 					err[j] += w[i];
 				}	
 			}
@@ -244,7 +244,7 @@ public class Training {
 	 * The function returns the sum of the 
 	 * weights.
 	 */
-	static double weightedMean(double[] w, double[] f, int n, double[] mu) {
+	static double weightedMean(double[] w, double[][] fv_face, int n, double[] mu) {
 
 		// Set everything to zero
 		double sum = 0;
@@ -257,7 +257,7 @@ public class Training {
 
 			// Loop over features
 			for (int j=0;j<nFeat;j++) {
-				mu[j] += w[i]*f[i*nFeat+j];
+				mu[j] += w[i]*fv_face[i][j];
 			}
 
 			// Sum the weights
@@ -276,20 +276,20 @@ public class Training {
 	 * Returns an nFiles-by-nFeat array of features
 	 * for at most nMax files in the specified dir.
 	 */
-	static double[] makeFeatureVector(String dir, int nMax) {; 
+	static double[][] makeFeatureVector(String dir, int nMax) {; 
 
         File folder = new File(dir);
         File[] listOfFiles = folder.listFiles();
 
         int nFiles = Math.min(listOfFiles.length, nMax);
-        double[] fv = new double[nFiles * nFeat];
+        double[][] fv = new double[nFiles][nFeat];
 
         for(int fileNo = 0; fileNo < nFiles; fileNo++) {
             IntegralImage img = new IntegralImage(listOfFiles[fileNo]);
             HaarFeature fet = new HaarFeature(img);
 
             for(int ind = 0; ind < nFeat; ind++) {
-                fv[fileNo * nFeat + ind] = fet.computeFeature(ind);
+                fv[fileNo][ind] = fet.computeFeature(ind);
             }
         }
 
