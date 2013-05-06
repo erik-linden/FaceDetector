@@ -17,7 +17,7 @@ public class Training {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		Vector<WeakClassifier> tr = Training.train();
+		CascadeClassifier tr = Training.train();
 		try {
 			FileOutputStream saveFile = new FileOutputStream("trainingData.sav");
 			ObjectOutputStream save = new ObjectOutputStream(saveFile);
@@ -30,17 +30,16 @@ public class Training {
 		}
 	}
 
-	static Vector train() {
+	static CascadeClassifier train() {
 		HaarFeature.init();
-		int nIter = 200;
 
 		double[][] fv_face = makeFeatureVector(
-		        FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages", "FACES"),
+				FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages", "FACES"),
 				10000);
 		int nFaces = fv_face.length;
 
 		double[][] fv_Nface = makeFeatureVector(
-		        FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages", "NFACES"),
+				FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages", "NFACES"),
 				10000);
 		int nNFaces = fv_Nface.length;
 
@@ -59,48 +58,146 @@ public class Training {
 		double sum_n;
 		TrainingResult tr;
 		Vector<WeakClassifier> classifier = new Vector<>();
-		JFrame frame = null;
+		Vector<Integer> cascadeLevels = new Vector<>();
+		Vector<Double> cascadeThlds = new Vector<>();
 
-		for (int n=0;n<nIter;n++) {
+		double fp_target = 1e-7;
+		double f = 0.50;
+		double d = 0.999;
+		int nLayers = 20;
+		int nClassifiers = 500;
 
-			long startTime = System.currentTimeMillis();
+		int i = 0;
+		int n = 0;
 
-			sum_p = weightedMean(w_face, fv_face, nFaces, mu_p);
-			sum_n = weightedMean(w_Nface, fv_Nface, nNFaces, mu_n);
-			setThreshold(mu_p,mu_n,thld,p);
+		double fp_i = 1;
+		double tp_i = 1;
+		double thld_adj = 0.1;
+		double fp_im;
+		double tp_im;
 
-			setError(w_face, fv_face, nFaces,
-					 thld, p, err_face, true);
-			setError(w_Nface, fv_Nface, nNFaces,
-					 thld, p, err_Nface, false);
+		while (fp_i > fp_target && i < nLayers) {
+			i++;
+			fp_im = fp_i;
+			tp_im = tp_i;
+			while (fp_i > f * fp_im && n < nClassifiers) {
+				n++;
+				long startTime = System.currentTimeMillis();
 
-			tr = getOptimal(w_face, err_face, sum_p,
-					   		   w_Nface, err_Nface, sum_n);
-			tr.thld = thld[tr.ind];
-			tr.par  = p[tr.ind];
-			
-			updateWeights(w_face, fv_face, nFaces, tr, true);
-			updateWeights(w_Nface, fv_Nface, nNFaces, tr, false);
-			
-			classifier.add(new WeakClassifier(tr.ind,tr.thld,tr.par,tr.alpha));
+				System.out.println("\nFeature no: "+n);
+
+				sum_p = weightedMean(w_face, fv_face, nFaces, mu_p);
+				sum_n = weightedMean(w_Nface, fv_Nface, nNFaces, mu_n);
+				setThreshold(mu_p,mu_n,thld,p);
+
+				setError(w_face, fv_face, nFaces,
+						thld, p, err_face, true);
+				setError(w_Nface, fv_Nface, nNFaces,
+						thld, p, err_Nface, false);
+
+				tr = getOptimal(w_face, err_face, sum_p,
+						w_Nface, err_Nface, sum_n);
+				tr.thld = thld[tr.ind];
+				tr.par  = p[tr.ind];
+
+				updateWeights(w_face, fv_face, nFaces, tr, true);
+				updateWeights(w_Nface, fv_Nface, nNFaces, tr, false);
+
+				classifier.add(new WeakClassifier(tr.ind,tr.thld,tr.par,tr.alpha));
+
+				tp_i = Double.MAX_VALUE;
+				double step = 0.0001;
+				while (tp_i > d * tp_im) {
+					thld_adj += step;
+					tp_i = ((double)testCascade(fv_face, nFaces, classifier, 
+							cascadeLevels,  cascadeThlds, thld_adj))/((double)nFaces);
+				} 
+				while (tp_i < d * tp_im && thld_adj>0) {
+					thld_adj -= step;
+					tp_i = ((double)testCascade(fv_face, nFaces, classifier, 
+							cascadeLevels, cascadeThlds, thld_adj))/((double)nFaces);
+				} 
+
+				System.out.println("TPR: "+tp_i+" with thld adj "+thld_adj);
+
+				if (thld_adj <= 0) {
+					fp_i = fp_im*2;
+				}
+				else {
+					fp_i = testCascade(fv_Nface, nNFaces, classifier, 
+							cascadeLevels, cascadeThlds, thld_adj);
+					System.out.println(fp_i);
+					fp_i = fp_i/((double)nNFaces);
+				}
+				System.out.println("FPR: "+fp_i+" with thld adj "+thld_adj);
+
+				System.out.println((System.currentTimeMillis()-startTime));
 
 
-			if (frame != null) {
-				frame.setVisible(false);
-				frame.dispose();
 			}
-//			frame = HaarFeature.showFeatureImg(tr[n].ind);
-			frame = HaarFeature.showClassifierImg(classifier);
-			System.out.println("\nFeature no: "+n);
-			System.out.println("True positives: "+testClassifier(fv_face, nFaces, classifier)*1000/nFaces+"%%");
-			System.out.println("False positives: "+testClassifier(fv_Nface, nNFaces, classifier)*1000/nNFaces+"%%");
-			System.out.println((System.currentTimeMillis()-startTime));
+			cascadeLevels.add(n);
+			cascadeThlds.add(thld_adj);
+			System.out.println("Layer "+i+" at "+(n)+" classifiers with thld adj="+thld_adj);
 		}
-		
-		return classifier;
+
+		return new CascadeClassifier(classifier, cascadeLevels, cascadeThlds);
 	}
 
-	static int testClassifier(double[][] fv_face, int n, Vector<WeakClassifier> classifier) {
+	static int testCascade(double[][] fv_face, int n, Vector<WeakClassifier> weakClassifiers, 
+			Vector<Integer> cascadeLevels, Vector<Double> cascadeThlds, double thld_adj) {
+
+		int sumDetection = 0;
+		for (int i=0;i<n;i++) {
+			double sumH = 0;
+			double sumA = 0;
+			int s = 0;
+			int nLayers = cascadeLevels.size();
+			boolean rejected = false;
+
+			for (int l=0;l<nLayers+1;l++) {
+				
+				int nSteps;
+				if (l == nLayers) {
+					nSteps = weakClassifiers.size();
+				}
+				else {
+					nSteps = cascadeLevels.get(l);
+				}
+
+				while(s<nSteps) {
+					WeakClassifier c = weakClassifiers.get(s);
+					if(c.parity*fv_face[i][c.index] > c.parity*c.thld) {
+						sumH += c.alpha;
+					}
+					sumA += c.alpha;
+
+					s++;
+				}
+
+				double thld_adj_l;
+				if (l == nLayers) {
+					thld_adj_l = thld_adj;
+				}
+				else {
+					thld_adj_l = cascadeThlds.get(l);
+				}
+				
+				if(sumH<sumA/2*thld_adj_l) {
+					rejected = true;
+					break;
+				}
+
+			}
+
+			if(!rejected) {
+				sumDetection++;
+			}
+
+		}
+		return sumDetection;
+	}
+
+	static int testClassifier(double[][] fv_face, int n, Vector<WeakClassifier> classifier, double thld_adj) {
 
 		int sumDetection = 0;
 		for (int i=0;i<n;i++) {
@@ -113,11 +210,13 @@ public class Training {
 				}
 				sumA += c.alpha;
 			}
-			if(sumH>=sumA/2) {
+			if(sumH>=sumA/2*thld_adj) {
 				sumDetection++;
 			}
 		}
 		return sumDetection;
+
+
 	}
 
 	/*
@@ -125,18 +224,18 @@ public class Training {
 	 */
 	static void updateWeights(double[] w, double[][] fv_face, int n,
 			TrainingResult tr, boolean pos) {
-		
+
 		double beta = tr.err/(1-tr.err);
 		tr.alpha = Math.log(1/beta);
 
 		// Loop over files.
 		for (int i=0;i<n;i++) {
-			
+
 			// True positive.
 			if (pos && tr.par*fv_face[i][tr.ind]>tr.par*tr.thld) {
 				w[i] *= beta;
 			}
-			
+
 			// True negative.
 			else if (!pos && tr.par*fv_face[i][tr.ind]<tr.par*tr.thld) {
 				w[i] *= beta;
@@ -167,7 +266,7 @@ public class Training {
 
 		// Loop over features.
 		for (int j=0;j<nFeat;j++) {
-			
+
 			// Find minimum total error.
 			err = (err_face[j]+err_Nface[j]);
 			if(err<minErr) {
@@ -193,18 +292,18 @@ public class Training {
 		for (int j=0;j<nFeat;j++) {
 			err[j] = 0;
 		}	
-		
+
 		// Loop over files.
 		for(int i=0;i<n;i++)  {
-			
+
 			// Loop over features.
 			for (int j=0;j<nFeat;j++) {
-				
+
 				// If a positive example fails detection.
 				if (pos && p[j]*fv_face[i][j]<p[j]*thld[j]) {
 					err[j] += w[i];
 				}
-				
+
 				// If a negative example is detected.
 				else if (!pos && p[j]*fv_face[i][j]>p[j]*thld[j]) {
 					err[j] += w[i];
@@ -220,11 +319,11 @@ public class Training {
 	 */
 	static void setThreshold(double[] mu_p, double[] mu_n,
 			double[] thld, int[] p) {
-		
+
 		// Loop over all features.
 		for (int j=0;j<nFeat;j++) {
 			thld[j] = (mu_p[j]+mu_n[j])/2;
-			
+
 			// Heuristics (good) for setting
 			// the parity.
 			if(mu_p[j]>mu_n[j]) {
@@ -278,22 +377,22 @@ public class Training {
 	 */
 	static double[][] makeFeatureVector(String dir, int nMax) {; 
 
-        File folder = new File(dir);
-        File[] listOfFiles = folder.listFiles();
+	File folder = new File(dir);
+	File[] listOfFiles = folder.listFiles();
 
-        int nFiles = Math.min(listOfFiles.length, nMax);
-        double[][] fv = new double[nFiles][nFeat];
+	int nFiles = Math.min(listOfFiles.length, nMax);
+	double[][] fv = new double[nFiles][nFeat];
 
-        for(int fileNo = 0; fileNo < nFiles; fileNo++) {
-            IntegralImage img = new IntegralImage(listOfFiles[fileNo]);
-            HaarFeature fet = new HaarFeature(img);
+	for(int fileNo = 0; fileNo < nFiles; fileNo++) {
+		IntegralImage img = new IntegralImage(listOfFiles[fileNo]);
+		HaarFeature fet = new HaarFeature(img);
 
-            for(int ind = 0; ind < nFeat; ind++) {
-                fv[fileNo][ind] = fet.computeFeature(ind);
-            }
-        }
+		for(int ind = 0; ind < nFeat; ind++) {
+			fv[fileNo][ind] = fet.computeFeature(ind);
+		}
+	}
 
-        return fv;
+	return fv;
 	}
 
 }

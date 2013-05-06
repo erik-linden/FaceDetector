@@ -17,31 +17,34 @@ import javax.swing.JLabel;
 public class ImageScanner {
 
 	HaarFeature f;
-	Vector<WeakClassifier> classifier;
-	int pixelSkip = 3;
-	double scaleSkip = 1.1;
+	CascadeClassifier classifier;
+	double pixelSkip = 1.1;
+	double scaleSkip = 1.15;
 
 	public static void main(String[] args) {
-		File file = new File(FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TestImages","Student4.jpg"));
+		File file = new File(FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TestImages","Student1.jpg"));
 		try {
 			BufferedImage srcImage = ImageIO.read(file);
 
 			IntegralImage img = new IntegralImage(file);
 			ImageScanner imgScanner = new ImageScanner();
 			imgScanner.f = new HaarFeature(img);
-			
+
 			FileInputStream saveFile = new FileInputStream("trainingData.sav");
 			ObjectInputStream restore = new ObjectInputStream(saveFile);
 			Object tr = restore.readObject();
 			restore.close();
 
 			HaarFeature.init();
-			imgScanner.classifier = (Vector<WeakClassifier>) tr;
+			imgScanner.classifier = (CascadeClassifier) tr;
+			
+			long startTime = System.currentTimeMillis();
 			Vector<Detection> list = imgScanner.scan();
+			System.out.println((System.currentTimeMillis()-startTime));
 
-//			for (Detection c : list) {
-//				System.out.println("x: "+c.x+" y: "+c.y+" w: "+c.w);
-//			}
+			//			for (Detection c : list) {
+			//				System.out.println("x: "+c.x+" y: "+c.y+" w: "+c.w);
+			//			}
 			System.out.println("Found: "+list.size());
 			drawBoundingBoxes(srcImage, list, 1);
 		} catch (Exception e) {
@@ -53,8 +56,9 @@ public class ImageScanner {
 	Vector<Detection> scan() {
 		Vector<Detection> list = new Vector<>();
 		int nTests = 0;
-		
-		int w = HaarFeature.MIN_PATCH_SIDE;
+		double scale = 2.0;
+
+		int w = (int) Math.round(((double)HaarFeature.MIN_PATCH_SIDE)*scale);
 		while (w<=Math.min(f.img.height, f.img.width)) {
 			int x=0;
 			while (x<(f.img.width-w)) {
@@ -64,11 +68,12 @@ public class ImageScanner {
 						list.add(new Detection(x,y,w));
 					}
 					nTests++;
-					y = y+pixelSkip;
+					y = (int) (y+Math.round(pixelSkip*scale));
 				}
-				x = x+pixelSkip;
+				x = (int) (x+Math.round(pixelSkip*scale));
 			}
-			w = (int) Math.round(w*scaleSkip);
+			scale *= scaleSkip;
+			w = (int) Math.round(((double)HaarFeature.MIN_PATCH_SIDE)*scale);
 		}		
 		System.out.println("Tested "+nTests+" locations");
 		return list;
@@ -80,18 +85,29 @@ public class ImageScanner {
 
 		double sumH = 0;
 		double sumA = 0;
-		for(WeakClassifier c : classifier) {
-			if(c.parity*f.computeFeature(c.index) > c.parity*c.thld) {
-				sumH += c.alpha;
+		int n = 0;
+		int nLayers = classifier.cascadeLevels.size();
+		
+		for (int l=0;l<nLayers;l++) {
+
+			while(n<classifier.cascadeLevels.get(l)) {
+				WeakClassifier c = classifier.weakClassifiers.get(n);
+				if(c.parity*f.computeFeature(c.index) > c.parity*c.thld) {
+					sumH += c.alpha;
+				}
+				sumA += c.alpha;
+				
+				n++;
 			}
-			sumA += c.alpha;
+			
+			double thld_adj = classifier.cascadeThlds.get(l);
+			if(sumH<sumA/2*thld_adj*1.35) {
+				return false;
+			}
+
 		}
-		if(sumH>=sumA/2*1.4) {
-			return true;
-		}
-		else {
-			return false;
-		}
+		
+		return true;
 	}
 
 	static void drawBoundingBoxes(BufferedImage srcImage, Vector<Detection> list, double scaleFactor) {
@@ -119,13 +135,13 @@ public class ImageScanner {
 			}
 		}
 		File outputfile = new File("img6.jpg");
-	    try {
+		try {
 			ImageIO.write(img, "jpg", outputfile);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
