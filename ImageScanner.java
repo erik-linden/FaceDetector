@@ -22,7 +22,9 @@ public class ImageScanner {
 	double scaleSkip = 1.15;
 
 	public static void main(String[] args) {
-		File file = new File(FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TestImages","Student1.jpg"));
+		File folder = new File(FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TestImages"));
+		File[] listOfFiles = folder.listFiles();
+		File file = listOfFiles[7];
 		try {
 			BufferedImage srcImage = ImageIO.read(file);
 
