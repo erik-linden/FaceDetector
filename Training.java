@@ -88,17 +88,24 @@ public class Training {
 
 				System.out.println("\nFeature no: "+n);
 
-				sum_p = weightedMean(w_face, fv_face, nFaces, mu_p);
-				sum_n = weightedMean(w_Nface, fv_Nface, nNFaces, mu_n);
-				setThreshold(mu_p,mu_n,thld,p);
+				sum_p = getSum(w_face, nFaces);
+				sum_n = getSum(w_Nface, nNFaces);
+
+				scaleWeights(w_face, nFaces, 1/(sum_p + sum_n));
+				scaleWeights(w_Nface, nNFaces, 1/(sum_p + sum_n));
+
+				weightedSum(w_face, fv_face, nFaces, mu_p);
+				weightedSum(w_Nface, fv_Nface, nNFaces, mu_n);
+
+				setThreshold(mu_p, mu_n, thld, p);
 
 				setError(w_face, fv_face, nFaces,
 						thld, p, err_face, true);
 				setError(w_Nface, fv_Nface, nNFaces,
 						thld, p, err_Nface, false);
 
-				tr = getOptimal(w_face, err_face, sum_p,
-						w_Nface, err_Nface, sum_n);
+				tr = getOptimal(w_face, err_face, w_Nface, err_Nface);
+
 				tr.thld = thld[tr.ind];
 				tr.par  = p[tr.ind];
 
@@ -259,6 +266,26 @@ public class Training {
 	}
 
 	/*
+	 * 
+	 */
+	static double getSum(double[] w, int n) {
+		double sum = 0;
+		for (int j=0;j<n;j++) {
+			sum += w[j];
+		}
+		return sum;
+	}
+
+	/*
+	 * 
+	 */
+	static void scaleWeights(double[] w, int n, double value) {
+		for (int j=0;j<n;j++) {
+			w[j] *= value;
+		}
+	}
+
+	/*
 	 * Sets all weights to some starting value.
 	 */
 	static void initWeights(double[] w, int n, double value) {
@@ -272,8 +299,7 @@ public class Training {
 	 * on the two training sets.
 	 */
 	static TrainingResult getOptimal(
-			double[] w_face, double[] err_face, double sum_p,
-			double[] w_Nface, double[] err_Nface, double sum_n) {
+			double[] w_face, double[] err_face, double[] w_Nface, double[] err_Nface) {
 
 		TrainingResult tr = new TrainingResult();
 		double minErr = Double.MAX_VALUE;
@@ -290,9 +316,7 @@ public class Training {
 			}
 		}
 
-		// The error should be computed with
-		// normalized weights.
-		tr.err = minErr/(sum_p+sum_n);
+		tr.err = minErr;
 		return tr;
 	}
 
@@ -351,17 +375,11 @@ public class Training {
 	}
 
 	/*
-	 * Computes the mean along the first dimension
-	 * of f, weighted by w. n is the length
-	 * of the first dimension of f.
 	 * The result is placed in mu.
-	 * The function returns the sum of the 
-	 * weights.
 	 */
-	static double weightedMean(double[] w, double[][] fv_face, int n, double[] mu) {
+	static void weightedSum(double[] w, double[][] fv_face, int n, double[] mu) {
 
 		// Set everything to zero
-		double sum = 0;
 		for (int j=0;j<nFeat;j++) {
 			mu[j] = 0;
 		}
@@ -374,16 +392,7 @@ public class Training {
 				mu[j] += w[i]*fv_face[i][j];
 			}
 
-			// Sum the weights
-			sum += w[i];
 		}
-
-		// Normalization
-		for (int j=0;j<nFeat;j++) {
-			mu[j] /= sum;
-		}
-
-		return sum;
 	}
 
 	/*
