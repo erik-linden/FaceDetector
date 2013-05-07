@@ -144,9 +144,15 @@ public class Training {
 
 
 			}
-			cascadeLevels.add(n);
-			cascadeThlds.add(thld_adj);
-			System.out.println("Layer "+i+" at "+(n)+" classifiers with thld adj="+thld_adj);
+
+			if (n <= nClassifiers) {
+				cascadeLevels.add(n);
+				cascadeThlds.add(thld_adj);
+				System.out.println("Layer "+i+" at "+(n)+" classifiers with thld adj="+thld_adj);
+			}
+			if (n == nClassifiers) {
+				break;
+			}
 		}
 
 		return new CascadeClassifier(classifier, cascadeLevels, cascadeThlds);
