@@ -61,8 +61,10 @@ public class Training {
 		Vector<Integer> cascadeLevels = new Vector<>();
 		Vector<Double> cascadeThlds = new Vector<>();
 
-		double fp_target = 1e-7;
-		double f = 0.50;
+		JFrame frame = null;
+
+		double fp_target = 1e-3;
+		double f = 0.75;
 		double d = 0.999;
 		int nLayers = 20;
 		int nClassifiers = 500;
@@ -129,6 +131,13 @@ public class Training {
 					System.out.println(fp_i);
 					fp_i = fp_i/((double)nNFaces);
 				}
+
+				if (frame != null) {
+					frame.setVisible(false);
+					frame.dispose();
+				}
+//				frame = HaarFeature.showClassifierImg(classifier);
+
 				System.out.println("FPR: "+fp_i+" with thld adj "+thld_adj);
 
 				System.out.println((System.currentTimeMillis()-startTime));
