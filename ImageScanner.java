@@ -40,6 +40,17 @@ public class ImageScanner {
 			restore.close();
 
 			HaarFeature.init();
+			
+			JFrame frame = new JFrame();
+			ImageIcon icon = new ImageIcon();
+
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+			frame.getContentPane().setLayout(new FlowLayout());
+			frame.getContentPane().add(new JLabel(icon));
+			frame.pack();
+			frame.setVisible(true);
+			
 			imgScanner.classifier = (CascadeClassifier) tr;
 			
 			long startTime = System.currentTimeMillis();
@@ -50,7 +61,7 @@ public class ImageScanner {
 			//				System.out.println("x: "+c.x+" y: "+c.y+" w: "+c.w);
 			//			}
 			System.out.println("Found: "+list.size());
-			drawBoundingBoxes(srcImage, list, 1);
+			drawBoundingBoxes(srcImage, list, 1, icon);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -114,7 +125,7 @@ public class ImageScanner {
 		return true;
 	}
 
-	static void drawBoundingBoxes(BufferedImage srcImage, Vector<Detection> list, double scaleFactor) {
+	static void drawBoundingBoxes(BufferedImage srcImage, Vector<Detection> list, double scaleFactor, ImageIcon icon) {
 
 		int width = srcImage.getWidth();
 		int height = srcImage.getHeight();
@@ -138,23 +149,9 @@ public class ImageScanner {
 				img.setRGB(d.x+d.w, y, rgb);
 			}
 		}
-		File outputfile = new File("img6.jpg");
-		try {
-			ImageIO.write(img, "jpg", outputfile);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
+		icon.setImage(img.getScaledInstance(
+								(int)(width*scaleFactor), (int)(height*scaleFactor), Image.SCALE_SMOOTH));
 
-		JFrame frame = new JFrame();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		frame.getContentPane().setLayout(new FlowLayout());
-		frame.getContentPane().add(
-				new JLabel(new ImageIcon(
-						img.getScaledInstance(
-								(int)(width*scaleFactor), (int)(height*scaleFactor), Image.SCALE_SMOOTH))));
-		frame.pack();
-		frame.setVisible(true);
 	}
 }
