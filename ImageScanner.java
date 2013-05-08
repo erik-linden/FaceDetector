@@ -18,8 +18,10 @@ public class ImageScanner {
 
 	HaarFeature f;
 	CascadeClassifier classifier;
-	double pixelSkip = 1.1;
-	double scaleSkip = 1.15;
+	double pixelSkip = 1.0;
+	double scaleSkip = 1.10;
+	double thld_gain = 1.3;
+	double startScale = 3;
 
 	public static void main(String[] args) {
 		File folder = new File(FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TestImages"));
@@ -58,7 +60,7 @@ public class ImageScanner {
 	Vector<Detection> scan() {
 		Vector<Detection> list = new Vector<>();
 		int nTests = 0;
-		double scale = 2.0;
+		double scale = startScale;
 
 		int w = (int) Math.round(((double)HaarFeature.MIN_PATCH_SIDE)*scale);
 		while (w<=Math.min(f.img.height, f.img.width)) {
@@ -103,7 +105,7 @@ public class ImageScanner {
 			}
 			
 			double thld_adj = classifier.cascadeThlds.get(l);
-			if(sumH<sumA/2*thld_adj*1.35) {
+			if(sumH<sumA/2*thld_adj*thld_gain) {
 				return false;
 			}
 
