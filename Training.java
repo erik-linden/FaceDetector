@@ -94,8 +94,8 @@ public class Training {
 				scaleWeights(w_face, nFaces, 1/(sum_p + sum_n));
 				scaleWeights(w_Nface, nNFaces, 1/(sum_p + sum_n));
 
-				weightedSum(w_face, fv_face, nFaces, mu_p);
-				weightedSum(w_Nface, fv_Nface, nNFaces, mu_n);
+				weightedMean(w_face, fv_face, nFaces, mu_p);
+				weightedMean(w_Nface, fv_Nface, nNFaces, mu_n);
 
 				setThreshold(mu_p, mu_n, thld, p);
 
@@ -377,12 +377,14 @@ public class Training {
 	/*
 	 * The result is placed in mu.
 	 */
-	static void weightedSum(double[] w, double[][] fv_face, int n, double[] mu) {
+	static void weightedMean(double[] w, double[][] fv_face, int n, double[] mu) {
 
 		// Set everything to zero
 		for (int j=0;j<nFeat;j++) {
 			mu[j] = 0;
 		}
+
+		double w_sum = 0;
 
 		// Loop over files
 		for (int i=0;i<n;i++) {
@@ -392,6 +394,12 @@ public class Training {
 				mu[j] += w[i]*fv_face[i][j];
 			}
 
+			w_sum += w[i];
+		}
+
+		// Normalize
+		for (int j=0;j<nFeat;j++) {
+			mu[j] /= w_sum;
 		}
 	}
 
