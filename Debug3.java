@@ -35,7 +35,7 @@ public class Debug3 {
                             EnvironmentConstants.PROJECT_ROOT,
                             "TrainingImages", "FACES",
                             String.format("face%05d.bmp", fileNo + 1)));
-            IntegralImage img = new IntegralImage(file);
+            IntegralImage img = IntegralImage.makeIntegralImage(file);
             HaarFeature fet = new HaarFeature(img);
 
             fs[fileNo] = fet.computeFeature(type, x, y, w, h);

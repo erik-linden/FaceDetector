@@ -23,7 +23,6 @@ public class HaarFeature {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		HaarFeature.init();
-		long startTime = System.currentTimeMillis();
 
 		File file = new File(FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages","FACES","face00001.bmp"));
 		IntegralImage img = IntegralImage.makeIntegralImage(file);
@@ -43,7 +42,6 @@ public class HaarFeature {
 			System.out.println(f[i]*100);
 		}
 
-		//System.out.println(System.currentTimeMillis()-startTime);
 
 	}
 

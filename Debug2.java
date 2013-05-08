@@ -13,7 +13,7 @@ public class Debug2 {
     public static final int y = 5;
 
     public static void main(String[] args) {
-        IntegralImage iim = new IntegralImage(new File(FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages", "FACES", "face00001.bmp")));
+        IntegralImage iim = IntegralImage.makeIntegralImage(new File(FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages", "FACES", "face00001.bmp")));
         HaarFeature.init();
         HaarFeature hf = new HaarFeature(iim);
         System.out.println(hf.typeI(x, y, w, h));
