@@ -1,7 +1,8 @@
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 
@@ -55,9 +56,9 @@ public class Training {
 		double sum_p;
 		double sum_n;
 		TrainingResult tr;
-		Vector<WeakClassifier> classifier = new Vector<>();
-		Vector<Integer> cascadeLevels = new Vector<>();
-		Vector<Double> cascadeThlds = new Vector<>();
+		List<WeakClassifier> classifier = new ArrayList<WeakClassifier>();
+		List<Integer> cascadeLevels = new ArrayList<Integer>();
+		List<Double> cascadeThlds = new ArrayList<Double>();
 
 		JFrame frame = null;
 
@@ -163,8 +164,8 @@ public class Training {
 		return new CascadeClassifier(classifier, cascadeLevels, cascadeThlds);
 	}
 
-	static int testCascade(double[][] fv_face, int n, Vector<WeakClassifier> weakClassifiers, 
-			Vector<Integer> cascadeLevels, Vector<Double> cascadeThlds, double thld_adj) {
+	static int testCascade(double[][] fv_face, int n, List<WeakClassifier> weakClassifiers, 
+			List<Integer> cascadeLevels, List<Double> cascadeThlds, double thld_adj) {
 
 		int sumDetection = 0;
 		for (int i=0;i<n;i++) {
@@ -217,7 +218,7 @@ public class Training {
 		return sumDetection;
 	}
 
-	static int testClassifier(double[][] fv_face, int n, Vector<WeakClassifier> classifier, double thld_adj) {
+	static int testClassifier(double[][] fv_face, int n, List<WeakClassifier> classifier, double thld_adj) {
 
 		int sumDetection = 0;
 		for (int i=0;i<n;i++) {

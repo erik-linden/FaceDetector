@@ -1,5 +1,5 @@
 import java.io.File;
-import java.util.Vector;
+import java.util.List;
 
 import javax.swing.JFrame;
 
@@ -446,7 +446,7 @@ public class HaarFeature {
 		return IntegralImage.showImg(img, MIN_PATCH_SIDE, MIN_PATCH_SIDE, 10);
 	}
 
-	static JFrame showClassifierImg(Vector<WeakClassifier> classifier) {
+	static JFrame showClassifierImg(List<WeakClassifier> classifier) {
 
 		double[] imgTemp = getFeatureImg(classifier.get(0).index);
 		int length = imgTemp.length;

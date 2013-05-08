@@ -5,7 +5,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
-import java.util.Vector;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -53,7 +54,7 @@ public class ImageScanner {
 			imgScanner.classifier = (CascadeClassifier) tr;
 			
 			long startTime = System.currentTimeMillis();
-			Vector<Detection> list = imgScanner.scan();
+			List<Detection> list = imgScanner.scan();
 			System.out.println((System.currentTimeMillis()-startTime));
 
 			//			for (Detection c : list) {
@@ -67,8 +68,8 @@ public class ImageScanner {
 		}
 	}
 
-	Vector<Detection> scan() {
-		Vector<Detection> list = new Vector<>();
+	List<Detection> scan() {
+		List<Detection> list = new LinkedList<Detection>();
 		int nTests = 0;
 		double scale = startScale;
 
@@ -124,7 +125,7 @@ public class ImageScanner {
 		return true;
 	}
 
-	static void drawBoundingBoxes(BufferedImage srcImage, Vector<Detection> list, double scaleFactor, ImageIcon icon) {
+	static void drawBoundingBoxes(BufferedImage srcImage, List<Detection> list, double scaleFactor, ImageIcon icon) {
 
 		int width = srcImage.getWidth();
 		int height = srcImage.getHeight();
