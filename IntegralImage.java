@@ -31,8 +31,19 @@ public class IntegralImage {
 	 */
 	public static void main(String [ ] args) {
 		File file = new File(FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages", "FACES", "face00001.bmp"));
-		IntegralImage img = new IntegralImage(file);
+		IntegralImage img = makeIntegralImage(file);
 		img.drawIntegralImage(10);
+	}
+	
+	static IntegralImage makeIntegralImage(File file) {
+		try {
+			BufferedImage srcImage = ImageIO.read(file);
+			return new IntegralImage(srcImage);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	/**
@@ -40,10 +51,8 @@ public class IntegralImage {
 	 * 
 	 * @param fileName name of image to use
 	 */
-	IntegralImage(File file) {		
-		try {
-			BufferedImage srcImage = ImageIO.read(file);
-
+	public IntegralImage(BufferedImage srcImage) {		
+	
 			width  = srcImage.getWidth();
 			height = srcImage.getHeight();
 
@@ -68,10 +77,7 @@ public class IntegralImage {
 			// Integrate both images.
 			integrateImage(integralImage);
 			integrateImage(squareIntegralImage);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+			
 	}
 
 	/**

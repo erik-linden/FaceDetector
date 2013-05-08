@@ -30,7 +30,7 @@ public class ImageScanner {
 		try {
 			BufferedImage srcImage = ImageIO.read(file);
 
-			IntegralImage img = new IntegralImage(file);
+			IntegralImage img = IntegralImage.makeIntegralImage(file);
 			ImageScanner imgScanner = new ImageScanner();
 			imgScanner.f = new HaarFeature(img);
 

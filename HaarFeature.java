@@ -26,7 +26,7 @@ public class HaarFeature {
 		long startTime = System.currentTimeMillis();
 
 		File file = new File(FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages","FACES","face00001.bmp"));
-		IntegralImage img = new IntegralImage(file);
+		IntegralImage img = IntegralImage.makeIntegralImage(file);
 		HaarFeature fet = new HaarFeature(img);
 
 		int nFeatures = 42310/100;

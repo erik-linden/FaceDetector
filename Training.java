@@ -408,7 +408,7 @@ public class Training {
 	double[][] fv = new double[nFiles][nFeat];
 
 	for(int fileNo = 0; fileNo < nFiles; fileNo++) {
-		IntegralImage img = new IntegralImage(listOfFiles[fileNo]);
+		IntegralImage img = IntegralImage.makeIntegralImage(listOfFiles[fileNo]);
 		HaarFeature fet = new HaarFeature(img);
 
 		for(int ind = 0; ind < nFeat; ind++) {
