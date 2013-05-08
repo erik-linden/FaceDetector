@@ -56,18 +56,24 @@ public class IntegralImage {
 			width  = srcImage.getWidth();
 			height = srcImage.getHeight();
 
-			// Convert to a grayscale image.
-			// TODO: variable weighting of RGB channels.
-			BufferedImage grayImage = new BufferedImage(width, height,  
-					BufferedImage.TYPE_BYTE_GRAY);
-			grayImage.getGraphics().drawImage(srcImage, 0, 0, null);
-
+			int[] rgb = new int[width*height];
+			rgb = srcImage.getRGB(0, 0, width, height, rgb, 0, width);
+			
 			integralImage 	    = new double [width*height];
 			squareIntegralImage = new double [width*height];
-
-			// Extract a double array from the BufferedImage object.
-			integralImage = grayImage.getData().getPixels(0, 0, width, height, integralImage);
-
+			
+			for (int i=0; i<width*height; i++) {
+				double red = (rgb[i] >> 16) & 0x000000FF;
+				double green = (rgb[i] >>8 ) & 0x000000FF;
+				double blue = (rgb[i]) & 0x000000FF;
+				
+				// Matlab style weighting
+				integralImage[i] = 
+						0.2989 * red +
+						0.5870 * green +
+						0.1140 * blue;
+			}
+			
 			// Build up an array containing the squared values of the original
 			// grayscale image.
 			for(int i = 0; i<width*height;i++) {
