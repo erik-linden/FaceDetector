@@ -43,8 +43,8 @@ public class Training {
 
 		double[] w_face = new double[nFaces];
 		double[] w_Nface = new double[nNFaces];
-		initWeights(w_face, nFaces, 1/(2*((double)nFaces)));
-		initWeights(w_Nface, nNFaces, 1/(2*((double)nNFaces)));
+		initWeights(w_face, 1/(2*((double)nFaces)));
+		initWeights(w_Nface, 1/(2*((double)nNFaces)));
 
 		double[] mu_p = new double[nFeat];
 		double[] mu_n = new double[nFeat];
@@ -286,8 +286,8 @@ public class Training {
 	/*
 	 * Sets all weights to some starting value.
 	 */
-	static void initWeights(double[] w, int n, double value) {
-		for (int j=0;j<n;j++) {
+	static void initWeights(double[] w, double value) {
+		for (int j=0;j<w.length;j++) {
 			w[j] = value;
 		}
 	}
