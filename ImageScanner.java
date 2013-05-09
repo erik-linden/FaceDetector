@@ -4,6 +4,7 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,49 +24,40 @@ public class ImageScanner {
 	double thld_gain = 1.3;
 	double startScale = 3;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException, ClassNotFoundException {
 		File folder = new File(FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TestImages"));
-		File[] listOfFiles = folder.listFiles();
-		File file = listOfFiles[7];
-		try {
-			BufferedImage srcImage = ImageIO.read(file);
+		
+		FileInputStream saveFile = new FileInputStream("trainingData.sav");
+		ObjectInputStream restore = new ObjectInputStream(saveFile);
+		Object tr = restore.readObject();
+		restore.close();
+		
+		ImageScanner imgScanner = new ImageScanner();
+		imgScanner.classifier = (CascadeClassifier) tr;
+		
+		HaarFeature.init();
+		
+		File file = folder.listFiles()[7];
+		
+		imgScanner.f = new HaarFeature(IntegralImage.makeIntegralImage(file));
 
-			IntegralImage img = IntegralImage.makeIntegralImage(file);
-			ImageScanner imgScanner = new ImageScanner();
-			imgScanner.f = new HaarFeature(img);
+		JFrame frame = new JFrame();
+		ImageIcon icon = new ImageIcon();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().setLayout(new FlowLayout());
+		frame.getContentPane().add(new JLabel(icon));
+		frame.pack();
+		frame.setVisible(true);
+		
+		long startTime = System.currentTimeMillis();
+		List<Detection> list = imgScanner.scan();
+		System.out.println((System.currentTimeMillis()-startTime));
 
-			FileInputStream saveFile = new FileInputStream("trainingData.sav");
-			ObjectInputStream restore = new ObjectInputStream(saveFile);
-			Object tr = restore.readObject();
-			restore.close();
-
-			HaarFeature.init();
-			
-			JFrame frame = new JFrame();
-			ImageIcon icon = new ImageIcon();
-
-			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-			frame.getContentPane().setLayout(new FlowLayout());
-			frame.getContentPane().add(new JLabel(icon));
-			frame.pack();
-			frame.setVisible(true);
-			
-			imgScanner.classifier = (CascadeClassifier) tr;
-			
-			long startTime = System.currentTimeMillis();
-			List<Detection> list = imgScanner.scan();
-			System.out.println((System.currentTimeMillis()-startTime));
-
-			//			for (Detection c : list) {
-			//				System.out.println("x: "+c.x+" y: "+c.y+" w: "+c.w);
-			//			}
-			System.out.println("Found: "+list.size());
-			drawBoundingBoxes(srcImage, list, 1, icon);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		//			for (Detection c : list) {
+		//				System.out.println("x: "+c.x+" y: "+c.y+" w: "+c.w);
+		//			}
+		System.out.println("Found: "+list.size());
+		drawBoundingBoxes(ImageIO.read(file), list, 1, icon);
 	}
 
 	List<Detection> scan() {
