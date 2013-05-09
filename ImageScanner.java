@@ -41,14 +41,6 @@ public class ImageScanner {
 		
 		imgScanner.f = new HaarFeature(IntegralImage.makeIntegralImage(file));
 
-		JFrame frame = new JFrame();
-		ImageIcon icon = new ImageIcon();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().setLayout(new FlowLayout());
-		frame.getContentPane().add(new JLabel(icon));
-		frame.pack();
-		frame.setVisible(true);
-		
 		long startTime = System.currentTimeMillis();
 		List<Detection> list = imgScanner.scan();
 		System.out.println((System.currentTimeMillis()-startTime));
@@ -57,7 +49,14 @@ public class ImageScanner {
 		//				System.out.println("x: "+c.x+" y: "+c.y+" w: "+c.w);
 		//			}
 		System.out.println("Found: "+list.size());
-		drawBoundingBoxes(ImageIO.read(file), list, 1, icon);
+
+		JFrame frame = new JFrame();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().setLayout(new FlowLayout());
+		frame.getContentPane().add(new JLabel(drawBoundingBoxes(ImageIO.read(file), list, 1)));
+		frame.pack();
+		frame.setVisible(true);
+		
 	}
 
 	List<Detection> scan() {
@@ -117,7 +116,7 @@ public class ImageScanner {
 		return true;
 	}
 
-	static void drawBoundingBoxes(BufferedImage srcImage, List<Detection> list, double scaleFactor, ImageIcon icon) {
+	static ImageIcon drawBoundingBoxes(BufferedImage srcImage, List<Detection> list, double scaleFactor) {
 
 		int width = srcImage.getWidth();
 		int height = srcImage.getHeight();
@@ -142,8 +141,8 @@ public class ImageScanner {
 			}
 		}
 		
-		icon.setImage(img.getScaledInstance(
-								(int)(width*scaleFactor), (int)(height*scaleFactor), Image.SCALE_SMOOTH));
+		return new ImageIcon(img.getScaledInstance((int) (width * scaleFactor),
+				(int) (height * scaleFactor), Image.SCALE_SMOOTH));
 
 	}
 }
