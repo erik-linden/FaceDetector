@@ -1,3 +1,4 @@
+package se.kth.bik.project;
 
 class TrainingResult {
 	int ind;

@@ -1,3 +1,5 @@
+package se.kth.bik.project;
+
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Image;

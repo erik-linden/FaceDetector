@@ -1,3 +1,4 @@
+package se.kth.bik.project;
 
 public class WeakClassifier implements java.io.Serializable {
 	/**

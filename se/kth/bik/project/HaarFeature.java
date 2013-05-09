@@ -1,3 +1,5 @@
+package se.kth.bik.project;
+
 import java.io.File;
 import java.util.List;
 
