@@ -73,24 +73,23 @@ public class IntegralImage {
 				
 				int i = x + srcImage.getWidth()*y;
 						
-				double red = (rgb[i] >> 16) & 0x000000FF;
-				double green = (rgb[i] >>8 ) & 0x000000FF;
-				double blue = (rgb[i]) & 0x000000FF;
+				int red = (rgb[i] >> 16) & 0x000000FF;
+				int green = (rgb[i] >>8 ) & 0x000000FF;
+				int blue = (rgb[i]) & 0x000000FF;
+				
+				int xp = x+1;
+				int yp = y+1;
 				
 				// Matlab style weighting
-				integralImage[x+1][y+1] = 
+				integralImage[xp][yp] = 
 						0.2989 * red +
 						0.5870 * green +
 						0.1140 * blue;
+				
+				// Build up an array containing the squared values of the original
+				// grayscale image.
+				squareIntegralImage[xp][yp] = Math.pow(integralImage[xp][yp],2);
 			}
-		}
-		
-		// Build up an array containing the squared values of the original
-		// grayscale image.
-		for(int y = 0; y<height+1; y++) {
-		    for(int x = 0; x<width+1; x++) {
-		        squareIntegralImage[x][y] = Math.pow(integralImage[x][y],2);
-		    }
 		}
 
 		// Integrate both images.
