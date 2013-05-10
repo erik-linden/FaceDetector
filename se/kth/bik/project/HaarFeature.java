@@ -75,7 +75,7 @@ public class HaarFeature {
 
 		// Here we use:
 		// std^2 = mean(x^2) - mean(x)^2
-		patch_mean = findInt(x,y,w,w);
+		patch_mean = img.integral(x,y,w,w);
 		patch_mean /= ((double)(w*w));
 
 		double meanSqr = findIntS(x,y,w,w);
@@ -150,8 +150,8 @@ public class HaarFeature {
 	 */
 	double typeI(int x, int y, int w, int h) {
 
-		double sumU = findInt(x,y,w,h);
-		double sumD = findInt(x,y+h,w,h);
+		double sumU = img.integral(x,y,w,h);
+		double sumD = img.integral(x,y+h,w,h);
 
 		return (sumD-sumU)/patch_std;
 	}
@@ -172,8 +172,8 @@ public class HaarFeature {
 	 */
 	double typeII(int x, int y, int w, int h) {
 
-		double sumL = findInt(x,y,w,h);
-		double sumR = findInt(x+w,y,w,h);
+		double sumL = img.integral(x,y,w,h);
+		double sumR = img.integral(x+w,y,w,h);
 
 		return (sumL-sumR)/patch_std;
 	}
@@ -194,9 +194,9 @@ public class HaarFeature {
 	 */
 	double typeIII(int x, int y, int w, int h) {
 
-		double sumL = findInt(x,y,w,h);
-		double sumC = findInt(x+w,y,w,h);
-		double sumR = findInt(x+2*w,y,w,h);
+		double sumL = img.integral(x,y,w,h);
+		double sumC = img.integral(x+w,y,w,h);
+		double sumR = img.integral(x+2*w,y,w,h);
 
 		// This is the only feature where we
 		// have to account for the mean, since
@@ -223,31 +223,12 @@ public class HaarFeature {
 	 */
 	double typeIV(int x, int y, int w, int h) {
 
-		double sumLU = findInt(x,y,w,h);
-		double sumRU = findInt(x+w,y,w,h);
-		double sumLD = findInt(x,y+h,w,h);
-		double sumRD = findInt(x+w,y+h,w,h);
+		double sumLU = img.integral(x,y,w,h);
+		double sumRU = img.integral(x+w,y,w,h);
+		double sumLD = img.integral(x,y+h,w,h);
+		double sumRD = img.integral(x+w,y+h,w,h);
 
 		return (-sumLD+sumRD+sumLU-sumRU)/patch_std;
-	}
-
-	private double findInt(int x, int y, int w, int h) {
-		// y  D    C
-		// ^  |----|
-		// |  |    |
-		// |  |----|
-		// |  A    B
-		// | -------> x
-
-		double A = img.xy(x, y);
-
-		double B = img.xy(x+w, y);
-
-		double D = img.xy(x, y+h);
-
-		double C = img.xy(x+w, y+h);
-
-		return A+C-B-D;			
 	}
 
 	/**

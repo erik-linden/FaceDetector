@@ -186,7 +186,40 @@ public class IntegralImage {
 		showImg(img, width, height, scaleFactor);
 	}
 	
-	static JFrame showImg(double[] img, int width, int height, double scaleFactor) {
+    /**
+     * Image integral.
+     * 
+     * @param x
+     *            the x coordinate of the upper-left corner
+     * @param y
+     *            the y coordinate of the upper-left corner
+     * @param w
+     *            the width of the rectangle
+     * @param h
+     *            the height of the rectangle
+     * @return the integral of the rectangle specified by
+     *         <code>x, y, w, h</code>
+     */
+	public double integral(int x, int y, int w, int h) {
+    	// y  D    C
+    	// ^  |----|
+    	// |  |    |
+    	// |  |----|
+    	// |  A    B
+    	// | -------> x
+    
+    	double A = xy(x, y);
+    
+    	double B = xy(x+w, y);
+    
+    	double D = xy(x, y+h);
+    
+    	double C = xy(x+w, y+h);
+    
+    	return A+C-B-D;			
+    }
+
+    static JFrame showImg(double[] img, int width, int height, double scaleFactor) {
 		// Find the smallest and largest values.
 				double min = Double.MAX_VALUE;
 				double max = Double.MIN_VALUE;
