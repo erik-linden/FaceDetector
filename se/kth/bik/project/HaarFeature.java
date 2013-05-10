@@ -78,7 +78,7 @@ public class HaarFeature {
 		patch_mean = img.integral(x,y,w,w);
 		patch_mean /= ((double)(w*w));
 
-		double meanSqr = findIntS(x,y,w,w);
+		double meanSqr = img.integralOfSquare(x,y,w,w);
 		meanSqr /= ((double)(w*w));
 
 		if (meanSqr<=0) {
@@ -229,29 +229,6 @@ public class HaarFeature {
 		double sumRD = img.integral(x+w,y+h,w,h);
 
 		return (-sumLD+sumRD+sumLU-sumRU)/patch_std;
-	}
-
-	/**
-	 * Identical to <code>findInt</code>, except that
-	 * it looks at the squared integral image instead.
-	 * 
-	 * @param x
-	 * @param y
-	 * @param w
-	 * @param h
-	 * @return
-	 */
-	private double findIntS(int x, int y, int w, int h) {		
-		
-		double A = img.xyS(x, y);
-
-		double B = img.xyS(x+w, y);
-
-		double D = img.xyS(x, y+h);
-
-		double C = img.xyS(x+w, y+h);
-
-		return A+C-B-D;			
 	}
 
 	/**

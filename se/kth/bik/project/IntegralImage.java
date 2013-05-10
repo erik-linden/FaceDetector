@@ -198,6 +198,25 @@ public class IntegralImage {
     	double D = xy(x, y+h);
     
     	double C = xy(x+w, y+h);
+        return A+C-B-D;
+    }
+
+    /**
+     * Identical to {@link #integral(int, int, int, int)}, except that it looks
+     * at the squared integral image instead.
+     * 
+     * @param x
+     * @param y
+     * @param w
+     * @param h
+     * @return
+     */
+    public double integralOfSquare(int x, int y, int w, int h) {
+
+        double A = xyS(x, y);
+        double B = xyS(x+w, y);
+        double D = xyS(x, y+h);
+        double C = xyS(x+w, y+h);
     
     	return A+C-B-D;			
     }
