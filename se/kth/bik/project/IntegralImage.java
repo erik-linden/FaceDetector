@@ -97,15 +97,6 @@ public class IntegralImage {
 		integrateImage(squareIntegralImage);
 	}
 
-	
-	public double xy(int x, int y) {
-		return integralImage[x][y];
-	}
-	
-	public double xyS(int x, int y) {
-		return squareIntegralImage[x][y];
-	}
-
 	/**
 	 * Calculates the integral image by taking the cumulative
 	 * sum in both directions.
@@ -191,13 +182,11 @@ public class IntegralImage {
     	// |  A    B
     	// | -------> x
     
-    	double A = xy(x, y);
+	double A = integralImage[x][y];
+	double B = integralImage[x+w][y];
+	double D = integralImage[x][y+h];
+	double C = integralImage[x+w][y+h];
     
-    	double B = xy(x+w, y);
-    
-    	double D = xy(x, y+h);
-    
-    	double C = xy(x+w, y+h);
         return A+C-B-D;
     }
 
@@ -213,10 +202,10 @@ public class IntegralImage {
      */
     public double integralOfSquare(int x, int y, int w, int h) {
 
-        double A = xyS(x, y);
-        double B = xyS(x+w, y);
-        double D = xyS(x, y+h);
-        double C = xyS(x+w, y+h);
+        double A = squareIntegralImage[x][y];
+        double B = squareIntegralImage[x+w][y];
+        double D = squareIntegralImage[x][y+h];
+        double C = squareIntegralImage[x+w][y+h];
     
     	return A+C-B-D;			
     }
