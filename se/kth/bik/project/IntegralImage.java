@@ -61,11 +61,11 @@ public class IntegralImage {
 			integralImage 	    = new double [width+1][height+1];
 			squareIntegralImage = new double [width+1][height+1];
 
-			updateSrcImage(srcImage);
+			setSrcImage(srcImage);
 			
 	}
 
-	public void updateSrcImage(BufferedImage srcImage) {
+	public void setSrcImage(BufferedImage srcImage) {
 		int[] rgb = srcImage.getRGB(0, 0, srcImage.getWidth(), srcImage.getHeight(), null, 0, srcImage.getWidth());
 		
 		for(int y = 0; y<srcImage.getHeight(); y++) {
