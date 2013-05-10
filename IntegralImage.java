@@ -21,6 +21,7 @@ public class IntegralImage {
 	 * The integral image of the squared source image
 	 */
 	private double[] squareIntegralImage;
+	private int[] rgb;
 	public int width;
 	public int height;
 
@@ -55,41 +56,45 @@ public class IntegralImage {
 	
 			width  = srcImage.getWidth();
 			height = srcImage.getHeight();
-
-			int[] rgb = new int[width*height];
-			rgb = srcImage.getRGB(0, 0, width, height, rgb, 0, width);
 			
+			rgb = new int[width*height];
 			integralImage 	    = new double [(width+1)*(height+1)];
 			squareIntegralImage = new double [(width+1)*(height+1)];
-			
-			for(int y = 0; y<height;y++) {
-				for(int x = 0; x<width;x++) {
-					
-					int i = x + width*y;
-					int ii = x+1 + (width+1)*(y+1);
-							
-					double red = (rgb[i] >> 16) & 0x000000FF;
-					double green = (rgb[i] >>8 ) & 0x000000FF;
-					double blue = (rgb[i]) & 0x000000FF;
-					
-					// Matlab style weighting
-					integralImage[ii] = 
-							0.2989 * red +
-							0.5870 * green +
-							0.1140 * blue;
-				}
-			}
-			
-			// Build up an array containing the squared values of the original
-			// grayscale image.
-			for(int i = 0; i<(width+1)*(height+1);i++) {
-				squareIntegralImage[i] = Math.pow(integralImage[i],2);
-			}
 
-			// Integrate both images.
-			integrateImage(integralImage);
-			integrateImage(squareIntegralImage);
+			updateSrcImage(srcImage);
 			
+	}
+
+	public void updateSrcImage(BufferedImage srcImage) {
+		rgb = srcImage.getRGB(0, 0, width, height, rgb, 0, width);
+		
+		for(int y = 0; y<height;y++) {
+			for(int x = 0; x<width;x++) {
+				
+				int i = x + width*y;
+				int ii = x+1 + (width+1)*(y+1);
+						
+				double red = (rgb[i] >> 16) & 0x000000FF;
+				double green = (rgb[i] >>8 ) & 0x000000FF;
+				double blue = (rgb[i]) & 0x000000FF;
+				
+				// Matlab style weighting
+				integralImage[ii] = 
+						0.2989 * red +
+						0.5870 * green +
+						0.1140 * blue;
+			}
+		}
+		
+		// Build up an array containing the squared values of the original
+		// grayscale image.
+		for(int i = 0; i<(width+1)*(height+1);i++) {
+			squareIntegralImage[i] = Math.pow(integralImage[i],2);
+		}
+
+		// Integrate both images.
+		integrateImage(integralImage);
+		integrateImage(squareIntegralImage);
 	}
 
 	/**

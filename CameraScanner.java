@@ -49,7 +49,7 @@ public class CameraScanner {
 			for(int i=0;i<100;) {
 				long startTime = System.currentTimeMillis();
 				srcImage = grabber.grab().getBufferedImage();
-				imgScanner.f.img = new IntegralImage(srcImage);;
+				imgScanner.f.img.updateSrcImage(srcImage);
 				Vector<Detection> list = imgScanner.scan();
 				System.out.println((System.currentTimeMillis()-startTime));
 
