@@ -23,6 +23,7 @@ public class IntegralImage {
 	 * The integral image of the squared source image
 	 */
 	private double[] squareIntegralImage;
+	private int[] rgb;
 	public int width;
 	public int height;
 
@@ -57,35 +58,45 @@ public class IntegralImage {
 	
 			width  = srcImage.getWidth();
 			height = srcImage.getHeight();
+			
+			rgb = new int[width*height];
+			integralImage 	    = new double [(width+1)*(height+1)];
+			squareIntegralImage = new double [(width+1)*(height+1)];
 
-			int[] rgb = new int[width*height];
-			rgb = srcImage.getRGB(0, 0, width, height, rgb, 0, width);
+			updateSrcImage(srcImage);
 			
-			integralImage 	    = new double [width*height];
-			squareIntegralImage = new double [width*height];
-			
-			for (int i=0; i<width*height; i++) {
+	}
+
+	public void updateSrcImage(BufferedImage srcImage) {
+		rgb = srcImage.getRGB(0, 0, width, height, rgb, 0, width);
+		
+		for(int y = 0; y<height;y++) {
+			for(int x = 0; x<width;x++) {
+				
+				int i = x + width*y;
+				int ii = x+1 + (width+1)*(y+1);
+						
 				double red = (rgb[i] >> 16) & 0x000000FF;
 				double green = (rgb[i] >>8 ) & 0x000000FF;
 				double blue = (rgb[i]) & 0x000000FF;
 				
 				// Matlab style weighting
-				integralImage[i] = 
+				integralImage[ii] = 
 						0.2989 * red +
 						0.5870 * green +
 						0.1140 * blue;
 			}
-			
-			// Build up an array containing the squared values of the original
-			// grayscale image.
-			for(int i = 0; i<width*height;i++) {
-				squareIntegralImage[i] = Math.pow(integralImage[i],2);
-			}
+		}
+		
+		// Build up an array containing the squared values of the original
+		// grayscale image.
+		for(int i = 0; i<(width+1)*(height+1);i++) {
+			squareIntegralImage[i] = Math.pow(integralImage[i],2);
+		}
 
-			// Integrate both images.
-			integrateImage(integralImage);
-			integrateImage(squareIntegralImage);
-			
+		// Integrate both images.
+		integrateImage(integralImage);
+		integrateImage(squareIntegralImage);
 	}
 
 	/**
@@ -97,7 +108,7 @@ public class IntegralImage {
 	 * @return i linear index
 	 */
 	public int coord(int x, int y) {
-		return x + width*y;
+		return x + (width+1)*y;
 	}
 	
 	public double xy(int x, int y) {
@@ -117,18 +128,18 @@ public class IntegralImage {
 	private void integrateImage(double [] img) {
 		
 		// Sum in the x-direction
-		for(int y = 0; y<height;y++) {
+		for(int y = 1; y<height+1;y++) {
 			double rs = 0;
-			for(int x = 0; x<width;x++) {
+			for(int x = 1; x<width+1;x++) {
 				rs += img[coord(x,y)];
 				img[coord(x,y)] = rs;
 			}
 		}
 
 		// Sum in the y-direction
-		for (int x = 0; x<width;x++){
+		for (int x = 1; x<width+1;x++){
 			double rs = 0;
-			for (int y = 0; y<height;y++) {
+			for (int y = 1; y<height+1;y++) {
 				rs += img[coord(x,y)];
 				img[coord(x,y)] = rs;
 			}
@@ -150,14 +161,14 @@ public class IntegralImage {
 		// std^2 = mean(x)^2 + mean(x^2)
 		//
 		// to normalize the image patch.
-		double mean = integralImage[width*height-1]/(width*height);
-		double meanSqr = squareIntegralImage[width*height-1]/(width*height);
+		double mean = integralImage[(width+1)*(height+1)-1]/(width*height);
+		double meanSqr = squareIntegralImage[(width+1)*(height+1)-1]/(width*height);
 		double std = Math.sqrt(meanSqr-Math.pow(mean,2));
 
 		for(int y = 0; y<height;y++) {
 			for(int x = 0; x<width;x++) {
-				normImage[coord(x,y)] = integralImage[coord(x,y)]-(x+1)*(y+1)*mean;
-				normImage[coord(x,y)] *= 1/std;
+				normImage[x + width*y] = integralImage[coord(x+1,y+1)]-(x+1)*(y+1)*mean;
+				normImage[x + width*y] *= 1/std;
 			}
 		}
 

@@ -239,25 +239,13 @@ public class HaarFeature {
 		// |  A    B
 		// | -------> x
 
-		double A;
-		if (x>0 && y>0)
-			A = img.xy(x-1, y-1);
-		else
-			A = 0;
+		double A = img.xy(x, y);
 
-		double B;
-		if (y>0)
-			B = img.xy(x+w-1, y-1);
-		else
-			B = 0;
+		double B = img.xy(x+w, y);
 
-		double D;
-		if (x>0)
-			D = img.xy(x-1, y+h-1);
-		else
-			D = 0;
+		double D = img.xy(x, y+h);
 
-		double C = img.xy(x+w-1, y+h-1);
+		double C = img.xy(x+w, y+h);
 
 		return A+C-B-D;			
 	}
@@ -273,25 +261,14 @@ public class HaarFeature {
 	 * @return
 	 */
 	private double findIntS(int x, int y, int w, int h) {		
-		double A;
-		if (x>0 && y>0)
-			A = img.xyS(x-1, y-1);
-		else
-			A = 0;
+		
+		double A = img.xyS(x, y);
 
-		double B;
-		if (y>0)
-			B = img.xyS(x+w-1, y-1);
-		else
-			B = 0;
+		double B = img.xyS(x+w, y);
 
-		double D;
-		if (x>0)
-			D = img.xyS(x-1, y+h-1);
-		else
-			D = 0;
+		double D = img.xyS(x, y+h);
 
-		double C = img.xyS(x+w-1, y+h-1);
+		double C = img.xyS(x+w, y+h);
 
 		return A+C-B-D;			
 	}
