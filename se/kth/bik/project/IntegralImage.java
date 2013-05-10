@@ -117,19 +117,15 @@ public class IntegralImage {
 		
 		// Sum in the x-direction
 		for(int y = 1; y<height+1;y++) {
-			double rs = 0;
 			for(int x = 1; x<width+1;x++) {
-				rs += img[x][y];
-				img[x][y] = rs;
+				img[x][y] += img[x-1][y];
 			}
 		}
 
 		// Sum in the y-direction
-		for (int x = 1; x<width+1;x++){
-			double rs = 0;
-			for (int y = 1; y<height+1;y++) {
-				rs += img[x][y];
-				img[x][y] = rs;
+		for (int y = 1; y<height+1;y++) {
+		    for (int x = 1; x<width+1;x++){
+		        img[x][y] += img[x][y-1];
 			}
 		}
 	}
