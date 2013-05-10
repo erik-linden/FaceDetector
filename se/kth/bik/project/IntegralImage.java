@@ -23,7 +23,6 @@ public class IntegralImage {
 	 * The integral image of the squared source image
 	 */
 	private double[] squareIntegralImage;
-	private int[] rgb;
 	public int width;
 	public int height;
 
@@ -59,7 +58,6 @@ public class IntegralImage {
 			width  = srcImage.getWidth();
 			height = srcImage.getHeight();
 			
-			rgb = new int[width*height];
 			integralImage 	    = new double [(width+1)*(height+1)];
 			squareIntegralImage = new double [(width+1)*(height+1)];
 
@@ -68,20 +66,19 @@ public class IntegralImage {
 	}
 
 	public void updateSrcImage(BufferedImage srcImage) {
-		rgb = srcImage.getRGB(0, 0, width, height, rgb, 0, width);
+		int[] rgb = srcImage.getRGB(0, 0, srcImage.getWidth(), srcImage.getHeight(), null, 0, srcImage.getWidth());
 		
-		for(int y = 0; y<height;y++) {
-			for(int x = 0; x<width;x++) {
+		for(int y = 0; y<srcImage.getHeight(); y++) {
+			for(int x = 0; x<srcImage.getWidth(); x++) {
 				
-				int i = x + width*y;
-				int ii = x+1 + (width+1)*(y+1);
+				int i = x + srcImage.getWidth()*y;
 						
 				double red = (rgb[i] >> 16) & 0x000000FF;
 				double green = (rgb[i] >>8 ) & 0x000000FF;
 				double blue = (rgb[i]) & 0x000000FF;
 				
 				// Matlab style weighting
-				integralImage[ii] = 
+				integralImage[coord(x+1,y+1)] = 
 						0.2989 * red +
 						0.5870 * green +
 						0.1140 * blue;
