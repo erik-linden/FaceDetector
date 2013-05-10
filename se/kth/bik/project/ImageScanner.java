@@ -67,11 +67,11 @@ public class ImageScanner {
 		double scale = startScale;
 
 		int w = (int) Math.round(((double)HaarFeature.MIN_PATCH_SIDE)*scale);
-		while (w<=Math.min(f.img.height, f.img.width)) {
+		while (w<=Math.min(f.img.getHeight(), f.img.getWidth())) {
 			int x=0;
-			while (x<(f.img.width-w)) {
+			while (x<(f.img.getWidth()-w)) {
 				int y=0;
-				while (y<(f.img.height-w)) {
+				while (y<(f.img.getHeight()-w)) {
 					if (testPatch(x,y,w)) {
 						list.add(new Detection(x,y,w));
 					}

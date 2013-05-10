@@ -57,7 +57,7 @@ public class HaarFeature {
 	 */
 	HaarFeature(IntegralImage newImg) {
 		img = newImg;
-		setROI(0, 0, Math.min(img.width, img.height));
+		setROI(0, 0, Math.min(img.getWidth(), img.getHeight()));
 	}
 
 	/**

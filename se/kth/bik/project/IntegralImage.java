@@ -23,8 +23,8 @@ public class IntegralImage {
 	 * The integral image of the squared source image
 	 */
 	private double[][] squareIntegralImage;
-	public int width;
-	public int height;
+	private int width;
+	private int height;
 
 	/**
 	 * For testing.
@@ -244,5 +244,13 @@ public class IntegralImage {
 				
 				return frame;
 	}
+    
+    public int getWidth() {
+        return width;
+    }
+    
+    public int getHeight() {
+        return height;
+    }
 
 }
