@@ -110,12 +110,12 @@ public class Training {
                 double step = 0.0001;
                 while (tp_i > d * tp_im) {
                     thld_adj += step;
-                    tp_i = ((double)testCascade(fv_face, nFaces, classifier,
+                    tp_i = ((double)testCascade(fv_face, classifier,
                             cascadeLevels,  cascadeThlds, thld_adj))/((double)nFaces);
                 }
                 while (tp_i < d * tp_im && thld_adj>0) {
                     thld_adj -= step;
-                    tp_i = ((double)testCascade(fv_face, nFaces, classifier,
+                    tp_i = ((double)testCascade(fv_face, classifier,
                             cascadeLevels, cascadeThlds, thld_adj))/((double)nFaces);
                 }
 
@@ -125,7 +125,7 @@ public class Training {
                     fp_i = fp_im*2;
                 }
                 else {
-                    fp_i = testCascade(fv_Nface, nNFaces, classifier,
+                    fp_i = testCascade(fv_Nface, classifier,
                             cascadeLevels, cascadeThlds, thld_adj);
                     System.out.println(fp_i);
                     fp_i = fp_i/((double)nNFaces);
@@ -157,11 +157,11 @@ public class Training {
         return new CascadeClassifier(classifier, cascadeLevels, cascadeThlds);
     }
 
-    static int testCascade(double[][] fv_face, int n, List<WeakClassifier> weakClassifiers,
+    static int testCascade(double[][] fv_face, List<WeakClassifier> weakClassifiers,
             List<Integer> cascadeLevels, List<Double> cascadeThlds, double thld_adj) {
 
         int sumDetection = 0;
-        for (int i=0;i<n;i++) {
+        for (int i=0;i<fv_face.length;i++) {
             double sumH = 0;
             double sumA = 0;
             int s = 0;
