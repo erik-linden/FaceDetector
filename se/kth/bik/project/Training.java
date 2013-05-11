@@ -85,8 +85,8 @@ public class Training {
 				System.out.println("\nFeature no: "+n);
 
 				normalizer = 1 / (Common.sum(w_face) + Common.sum(w_Nface));
-				scaleWeights(w_face, nFaces, normalizer);
-				scaleWeights(w_Nface, nNFaces, normalizer);
+				scaleWeights(w_face, normalizer);
+				scaleWeights(w_Nface, normalizer);
 
 				weightedMean(w_face, fv_face, nFaces, mu_p);
 				weightedMean(w_Nface, fv_Nface, nNFaces, mu_n);
@@ -262,8 +262,8 @@ public class Training {
 	/*
 	 * 
 	 */
-	static void scaleWeights(double[] w, int n, double value) {
-		for (int j=0;j<n;j++) {
+	static void scaleWeights(double[] w, double value) {
+		for (int j=0;j<w.length;j++) {
 			w[j] *= value;
 		}
 	}
