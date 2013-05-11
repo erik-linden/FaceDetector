@@ -1,9 +1,9 @@
 package se.kth.bik.project;
 
 public class Detection {
-	int x;
-	int y;
-	int w;
+	public final int x;
+	public final int y;
+	public final int w;
 	
 	public Detection(int x, int y, int w) {
 		this.x = x;
