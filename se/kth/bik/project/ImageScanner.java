@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -38,26 +39,35 @@ public class ImageScanner {
 		imgScanner.classifier = (CascadeClassifier) tr;
 		
 		HaarFeature.init();
-		
-		File file = folder.listFiles()[7];
-		
-		imgScanner.f = new HaarFeature(IntegralImage.makeIntegralImage(file));
 
-		long startTime = System.currentTimeMillis();
-		List<Detection> list = imgScanner.scan();
-		System.out.println((System.currentTimeMillis()-startTime));
+		if(true) {
+		    List<BufferedImage> images = new ArrayList<BufferedImage>(folder.listFiles().length);
+		    for(File file : folder.listFiles()) {
+		        images.add(ImageIO.read(file));
+		    }
+		    long millis = imgScanner.testPerformance(images);
+		    System.out.println(String.format("Processed %d images in %d ms", images.size(), millis));
+		} else {
+		    File file = folder.listFiles()[7];
 
-		//			for (Detection c : list) {
-		//				System.out.println("x: "+c.x+" y: "+c.y+" w: "+c.w);
-		//			}
-		System.out.println("Found: "+list.size());
+		    imgScanner.f = new HaarFeature(IntegralImage.makeIntegralImage(file));
 
-		JFrame frame = new JFrame();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().setLayout(new FlowLayout());
-		frame.getContentPane().add(new JLabel(drawBoundingBoxes(ImageIO.read(file), list, 1)));
-		frame.pack();
-		frame.setVisible(true);
+		    long startTime = System.currentTimeMillis();
+		    List<Detection> list = imgScanner.scan();
+		    System.out.println((System.currentTimeMillis()-startTime));
+
+		    //			for (Detection c : list) {
+		    //				System.out.println("x: "+c.x+" y: "+c.y+" w: "+c.w);
+		    //			}
+		    System.out.println("Found: "+list.size());
+
+		    JFrame frame = new JFrame();
+		    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		    frame.getContentPane().setLayout(new FlowLayout());
+		    frame.getContentPane().add(new JLabel(drawBoundingBoxes(ImageIO.read(file), list, 1)));
+		    frame.pack();
+		    frame.setVisible(true);
+		}
 		
 	}
 
