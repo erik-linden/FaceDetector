@@ -130,7 +130,7 @@ public class HaarFeature {
 		case 4:
 			return typeIV(x, y, w, h);
 		default:
-			System.out.println(String.format("Tried to use feature type: %d x=%d y=%d w=%d h=%d", type, x, y, w, h));
+			System.err.println(String.format("Tried to use feature type: %d x=%d y=%d w=%d h=%d", type, x, y, w, h));
 			return Double.NaN;
 		}
     }
