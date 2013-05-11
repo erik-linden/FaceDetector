@@ -93,10 +93,8 @@ public class Training {
 
 				setThreshold(mu_p, mu_n, thld, p);
 
-				setError(w_face, fv_face, nFaces,
-						thld, p, err_face, true);
-				setError(w_Nface, fv_Nface, nNFaces,
-						thld, p, err_Nface, false);
+                setError(w_face, fv_face, thld, p, err_face, true);
+                setError(w_Nface, fv_Nface, thld, p, err_Nface, false);
 
 				tr = getOptimal(w_face, err_face, w_Nface, err_Nface);
 
@@ -306,7 +304,7 @@ public class Training {
 	/*
 	 *  Finds the weighted error for each weak classifier.
 	 */
-	static void setError(double[] w, double[][] fv_face, int n,
+	static void setError(double[] w, double[][] fv_face,
 			double[] thld, int[] p, 
 			double[] err, boolean pos) {
 
@@ -316,7 +314,7 @@ public class Training {
 		}	
 
 		// Loop over files.
-		for(int i=0;i<n;i++)  {
+		for(int i=0;i<fv_face.length;i++)  {
 
 			// Loop over features.
 			for (int j=0;j<nFeat;j++) {
