@@ -10,4 +10,12 @@ public class Common {
         }
     }
 
+    public static double sum(double[] array) {
+	double sum = 0;
+	for(double d : array) {
+		sum += d;
+	}
+	return sum;
+    }
+
 }

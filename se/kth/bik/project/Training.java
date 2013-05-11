@@ -85,8 +85,8 @@ public class Training {
 
 				System.out.println("\nFeature no: "+n);
 
-				sum_p = getSum(w_face);
-				sum_n = getSum(w_Nface);
+				sum_p = Common.sum(w_face);
+				sum_n = Common.sum(w_Nface);
 
 				scaleWeights(w_face, nFaces, 1/(sum_p + sum_n));
 				scaleWeights(w_Nface, nNFaces, 1/(sum_p + sum_n));
@@ -260,17 +260,6 @@ public class Training {
 				w[i] *= beta;
 			}
 		}
-	}
-
-	/*
-	 * 
-	 */
-	static double getSum(double[] w) {
-		double sum = 0;
-		for(double d : w) {
-			sum += d;
-		}
-		return sum;
 	}
 
 	/*
