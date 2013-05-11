@@ -185,7 +185,7 @@ public class Training {
 
 				while(s<nSteps) {
 					WeakClassifier c = weakClassifiers.get(s);
-					if(c.parity*fv_face[i][c.index] > c.parity*c.thld) {
+					if(c.classify(fv_face[i])) {
 						sumH += c.alpha;
 					}
 					sumA += c.alpha;

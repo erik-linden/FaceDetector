@@ -119,7 +119,7 @@ public class ImageScanner {
 
 			while(n<classifier.cascadeLevels.get(l)) {
 				WeakClassifier c = classifier.weakClassifiers.get(n);
-				if(c.parity*f.computeFeature(c.index) > c.parity*c.thld) {
+				if(c.classify(f)) {
 					sumH += c.alpha;
 				}
 				sumA += c.alpha;
