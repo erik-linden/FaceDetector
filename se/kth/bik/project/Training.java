@@ -101,8 +101,8 @@ public class Training {
                 tr.thld = thld[tr.ind];
                 tr.par  = p[tr.ind];
 
-                updateWeights(w_face, fv_face, nFaces, tr, true);
-                updateWeights(w_Nface, fv_Nface, nNFaces, tr, false);
+                updateWeights(w_face, fv_face, tr, true);
+                updateWeights(w_Nface, fv_Nface, tr, false);
 
                 classifier.add(new WeakClassifier(tr.ind,tr.thld,tr.par,tr.alpha));
 
@@ -236,14 +236,14 @@ public class Training {
     /*
      * Lowers the weight on correctly classified training data.
      */
-    static void updateWeights(double[] w, double[][] fv_face, int n,
+    static void updateWeights(double[] w, double[][] fv_face,
             TrainingResult tr, boolean pos) {
 
         double beta = tr.err/(1-tr.err);
         tr.alpha = Math.log(1/beta);
 
         // Loop over files.
-        for (int i=0;i<n;i++) {
+        for (int i=0;i<fv_face.length;i++) {
 
             // True positive.
             if (pos && tr.par*fv_face[i][tr.ind]>tr.par*tr.thld) {
