@@ -61,6 +61,15 @@ public class ImageScanner {
 		
 	}
 
+    public long testPerformance(Iterable<BufferedImage> images) {
+        long startTime = System.currentTimeMillis();
+        for(BufferedImage image : images) {
+            f = new HaarFeature(new IntegralImage(image));
+            scan();
+        }
+        return System.currentTimeMillis() - startTime;
+    }
+
 	List<Detection> scan() {
 		List<Detection> list = new LinkedList<Detection>();
 		int nTests = 0;
