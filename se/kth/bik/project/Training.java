@@ -17,7 +17,6 @@ public class Training {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		CascadeClassifier tr = Training.train();
 		try {
 			FileOutputStream saveFile = new FileOutputStream("trainingData.sav");

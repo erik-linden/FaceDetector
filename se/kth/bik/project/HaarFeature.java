@@ -23,7 +23,6 @@ public class HaarFeature {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		HaarFeature.init();
 
 		File file = new File(FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages","FACES","face00001.bmp"));
