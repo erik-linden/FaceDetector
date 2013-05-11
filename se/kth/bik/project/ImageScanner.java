@@ -92,7 +92,7 @@ public class ImageScanner {
 			scale *= scaleSkip;
 			w = (int) Math.round(((double)HaarFeature.MIN_PATCH_SIDE)*scale);
 		}		
-		System.out.println("Tested "+nTests+" locations");
+		Common.debugPrint("Tested "+nTests+" locations");
 		return list;
 	}
 
