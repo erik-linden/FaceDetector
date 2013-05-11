@@ -400,28 +400,28 @@ public class Training {
 		}
 	}
 
-	/*
-	 * Returns an nFiles-by-nFeat array of features
-	 * for at most nMax files in the specified dir.
-	 */
-	static double[][] makeFeatureVector(String dir, int nMax) throws IOException {;
+    /*
+     * Returns an nFiles-by-nFeat array of features for at most nMax files in
+     * the specified dir.
+     */
+    static double[][] makeFeatureVector(String dir, int nMax) throws IOException {
 
-	File folder = new File(dir);
-	File[] listOfFiles = folder.listFiles();
+        File folder = new File(dir);
+        File[] listOfFiles = folder.listFiles();
 
-	int nFiles = Math.min(listOfFiles.length, nMax);
-	double[][] fv = new double[nFiles][nFeat];
+        int nFiles = Math.min(listOfFiles.length, nMax);
+        double[][] fv = new double[nFiles][nFeat];
 
-	for(int fileNo = 0; fileNo < nFiles; fileNo++) {
-		IntegralImage img = IntegralImage.makeIntegralImage(listOfFiles[fileNo]);
-		HaarFeature fet = new HaarFeature(img);
+        for(int fileNo = 0; fileNo < nFiles; fileNo++) {
+            IntegralImage img = IntegralImage.makeIntegralImage(listOfFiles[fileNo]);
+            HaarFeature fet = new HaarFeature(img);
 
-		for(int ind = 0; ind < nFeat; ind++) {
-			fv[fileNo][ind] = fet.computeFeature(ind);
-		}
-	}
+            for(int ind = 0; ind < nFeat; ind++) {
+                fv[fileNo][ind] = fet.computeFeature(ind);
+            }
+        }
 
-	return fv;
-	}
+        return fv;
+    }
 
 }
