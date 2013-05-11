@@ -1,6 +1,7 @@
 package se.kth.bik.project;
 
 import java.io.File;
+import java.io.IOException;
 
 public class Debug2 {
 
@@ -14,7 +15,7 @@ public class Debug2 {
     public static final int x = 4;
     public static final int y = 5;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         IntegralImage iim = IntegralImage.makeIntegralImage(new File(FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages", "FACES", "face00001.bmp")));
         HaarFeature.init();
         HaarFeature hf = new HaarFeature(iim);

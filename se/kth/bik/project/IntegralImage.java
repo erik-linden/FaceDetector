@@ -30,22 +30,17 @@ public class IntegralImage {
 	 * For testing.
 	 * 
 	 * @param args
+	 * @throws IOException
 	 */
-	public static void main(String [ ] args) {
+	public static void main(String [ ] args) throws IOException {
 		File file = new File(FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages", "FACES", "face00001.bmp"));
 		IntegralImage img = makeIntegralImage(file);
 		img.drawIntegralImage(10);
 	}
 	
-	static IntegralImage makeIntegralImage(File file) {
-		try {
-			BufferedImage srcImage = ImageIO.read(file);
-			return new IntegralImage(srcImage);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+	static IntegralImage makeIntegralImage(File file) throws IOException {
+		BufferedImage srcImage = ImageIO.read(file);
+		return new IntegralImage(srcImage);
 	}
 
 	/**

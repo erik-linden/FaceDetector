@@ -1,6 +1,7 @@
 package se.kth.bik.project;
 
 import java.io.File;
+import java.io.IOException;
 
 public class Debug3 {
 
@@ -26,7 +27,7 @@ public class Debug3 {
     public static final int w = 5;
     public static final int h = 5;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         int nFiles = 100;
         double fs[] = new double[nFiles];

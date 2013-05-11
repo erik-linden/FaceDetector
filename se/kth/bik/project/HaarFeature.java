@@ -1,6 +1,7 @@
 package se.kth.bik.project;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -21,8 +22,9 @@ public class HaarFeature {
 	 * For testing.
 	 * 
 	 * @param args
+	 * @throws IOException
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		HaarFeature.init();
 
 		File file = new File(FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages","FACES","face00001.bmp"));

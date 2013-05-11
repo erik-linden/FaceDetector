@@ -2,6 +2,7 @@ package se.kth.bik.project;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,22 +16,18 @@ public class Training {
 
 	/**
 	 * @param args
+	 * @throws IOException
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		CascadeClassifier tr = Training.train();
-		try {
-			FileOutputStream saveFile = new FileOutputStream("trainingData.sav");
-			ObjectOutputStream save = new ObjectOutputStream(saveFile);
-			save.writeObject(tr);
-			save.close();
 
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		FileOutputStream saveFile = new FileOutputStream("trainingData.sav");
+		ObjectOutputStream save = new ObjectOutputStream(saveFile);
+		save.writeObject(tr);
+		save.close();
 	}
 
-	static CascadeClassifier train() {
+	static CascadeClassifier train() throws IOException {
 		HaarFeature.init();
 
 		double[][] fv_face = makeFeatureVector(
@@ -407,7 +404,7 @@ public class Training {
 	 * Returns an nFiles-by-nFeat array of features
 	 * for at most nMax files in the specified dir.
 	 */
-	static double[][] makeFeatureVector(String dir, int nMax) {; 
+	static double[][] makeFeatureVector(String dir, int nMax) throws IOException {;
 
 	File folder = new File(dir);
 	File[] listOfFiles = folder.listFiles();
