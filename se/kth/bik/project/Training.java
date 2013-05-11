@@ -51,8 +51,6 @@ public class Training {
         int[] p = new int[nFeat];
         double[] err_face   = new double[nFeat];
         double[] err_Nface  = new double[nFeat];
-        double normalizer;
-        TrainingResult tr;
         List<WeakClassifier> classifier = new ArrayList<WeakClassifier>();
         List<Integer> cascadeLevels = new ArrayList<Integer>();
         List<Double> cascadeThlds = new ArrayList<Double>();
@@ -84,27 +82,9 @@ public class Training {
 
                 System.out.println("\nFeature no: "+n);
 
-                normalizer = 1 / (Common.sum(w_face) + Common.sum(w_Nface));
-                scaleWeights(w_face, normalizer);
-                scaleWeights(w_Nface, normalizer);
-
-                weightedMean(w_face, fv_face, mu_p);
-                weightedMean(w_Nface, fv_Nface, mu_n);
-
-                setThreshold(mu_p, mu_n, thld, p);
-
-                setError(w_face, fv_face, thld, p, err_face, true);
-                setError(w_Nface, fv_Nface, thld, p, err_Nface, false);
-
-                tr = getOptimal(w_face, err_face, w_Nface, err_Nface);
-
-                tr.thld = thld[tr.ind];
-                tr.par  = p[tr.ind];
-
-                updateWeights(w_face, fv_face, tr, true);
-                updateWeights(w_Nface, fv_Nface, tr, false);
-
-                classifier.add(new WeakClassifier(tr.ind,tr.thld,tr.par,tr.alpha));
+                classifier.add(
+                        selectAndTrainWeakClassifier(fv_face, fv_Nface, w_face,
+                                w_Nface, mu_p, mu_n, thld, p, err_face, err_Nface));
 
                 tp_i = Double.MAX_VALUE;
                 double step = 0.0001;
@@ -155,6 +135,40 @@ public class Training {
         }
 
         return new CascadeClassifier(classifier, cascadeLevels, cascadeThlds);
+    }
+
+    private static WeakClassifier selectAndTrainWeakClassifier(double[][] fv_face,
+            double[][] fv_Nface,
+            double[] w_face,
+            double[] w_Nface,
+            double[] mu_p,
+            double[] mu_n,
+            double[] thld,
+            int[] p,
+            double[] err_face,
+            double[] err_Nface) {
+        TrainingResult tr;
+        double normalizer = 1 / (Common.sum(w_face) + Common.sum(w_Nface));
+        scaleWeights(w_face, normalizer);
+        scaleWeights(w_Nface, normalizer);
+
+        weightedMean(w_face, fv_face, mu_p);
+        weightedMean(w_Nface, fv_Nface, mu_n);
+
+        setThreshold(mu_p, mu_n, thld, p);
+
+        setError(w_face, fv_face, thld, p, err_face, true);
+        setError(w_Nface, fv_Nface, thld, p, err_Nface, false);
+
+        tr = getOptimal(w_face, err_face, w_Nface, err_Nface);
+
+        tr.thld = thld[tr.ind];
+        tr.par  = p[tr.ind];
+
+        updateWeights(w_face, fv_face, tr, true);
+        updateWeights(w_Nface, fv_Nface, tr, false);
+
+        return new WeakClassifier(tr.ind,tr.thld,tr.par,tr.alpha);
     }
 
     static int testCascade(double[][] fv_face, List<WeakClassifier> weakClassifiers,
