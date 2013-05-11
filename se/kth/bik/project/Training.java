@@ -51,8 +51,7 @@ public class Training {
 		int[] p = new int[nFeat];
 		double[] err_face   = new double[nFeat];
 		double[] err_Nface  = new double[nFeat];
-		double sum_p;
-		double sum_n;
+		double normalizer;
 		TrainingResult tr;
 		List<WeakClassifier> classifier = new ArrayList<WeakClassifier>();
 		List<Integer> cascadeLevels = new ArrayList<Integer>();
@@ -85,11 +84,9 @@ public class Training {
 
 				System.out.println("\nFeature no: "+n);
 
-				sum_p = Common.sum(w_face);
-				sum_n = Common.sum(w_Nface);
-
-				scaleWeights(w_face, nFaces, 1/(sum_p + sum_n));
-				scaleWeights(w_Nface, nNFaces, 1/(sum_p + sum_n));
+				normalizer = 1 / (Common.sum(w_face) + Common.sum(w_Nface));
+				scaleWeights(w_face, nFaces, normalizer);
+				scaleWeights(w_Nface, nNFaces, normalizer);
 
 				weightedMean(w_face, fv_face, nFaces, mu_p);
 				weightedMean(w_Nface, fv_Nface, nNFaces, mu_n);
