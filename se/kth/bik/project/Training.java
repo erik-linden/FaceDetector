@@ -147,7 +147,7 @@ public class Training {
             int[] p,
             double[] err_face,
             double[] err_Nface) {
-        TrainingResult tr;
+
         double normalizer = 1 / (Common.sum(w_face) + Common.sum(w_Nface));
         scaleWeights(w_face, normalizer);
         scaleWeights(w_Nface, normalizer);
@@ -160,15 +160,32 @@ public class Training {
         setError(w_face, fv_face, thld, p, err_face, true);
         setError(w_Nface, fv_Nface, thld, p, err_Nface, false);
 
-        tr = getOptimal(w_face, err_face, w_Nface, err_Nface);
+        /*
+         * Find the weak classifier that minimizes the total error
+         * on the two training sets.
+         */
+        int bestIndex = 0;
+        double minErr = Double.MAX_VALUE;
+        double err;
 
-        tr.thld = thld[tr.ind];
-        tr.par  = p[tr.ind];
+        // Loop over features.
+        for (int j=0;j<nFeat;j++) {
 
-        updateWeights(w_face, fv_face, tr, true);
-        updateWeights(w_Nface, fv_Nface, tr, false);
+            // Find minimum total error.
+            err = (err_face[j]+err_Nface[j]);
+            if(err<minErr) {
+                minErr = err;
+                bestIndex = j;
+            }
+        }
 
-        return new WeakClassifier(tr.ind,tr.thld,tr.par,tr.alpha);
+        int par = p[bestIndex];
+        double threshold = thld[bestIndex];
+
+        double alpha = updateWeights(w_face, fv_face, bestIndex, par, threshold, minErr, true);
+        updateWeights(w_Nface, fv_Nface, bestIndex, par, threshold, minErr, false);
+
+        return new WeakClassifier(bestIndex,threshold,par,alpha);
     }
 
     static int testCascade(double[][] fv_face, List<WeakClassifier> weakClassifiers,
@@ -250,25 +267,26 @@ public class Training {
     /*
      * Lowers the weight on correctly classified training data.
      */
-    static void updateWeights(double[] w, double[][] fv_face,
-            TrainingResult tr, boolean pos) {
+    static double updateWeights(double[] w, double[][] fv_face,
+            int index, int par, double thld, double err, boolean pos) {
 
-        double beta = tr.err/(1-tr.err);
-        tr.alpha = Math.log(1/beta);
+        double beta = err/(1-err);
+        double alpha = Math.log(1/beta);
 
         // Loop over files.
         for (int i=0;i<fv_face.length;i++) {
 
             // True positive.
-            if (pos && tr.par*fv_face[i][tr.ind]>tr.par*tr.thld) {
+            if (pos && par*fv_face[i][index]>par*thld) {
                 w[i] *= beta;
             }
 
             // True negative.
-            else if (!pos && tr.par*fv_face[i][tr.ind]<tr.par*tr.thld) {
+            else if (!pos && par*fv_face[i][index]<par*thld) {
                 w[i] *= beta;
             }
         }
+        return alpha;
     }
 
     /*
@@ -287,32 +305,6 @@ public class Training {
         for (int j=0;j<w.length;j++) {
             w[j] = value;
         }
-    }
-
-    /*
-     * Finds the weak classifier that minimizes the total error
-     * on the two training sets.
-     */
-    static TrainingResult getOptimal(
-            double[] w_face, double[] err_face, double[] w_Nface, double[] err_Nface) {
-
-        TrainingResult tr = new TrainingResult();
-        double minErr = Double.MAX_VALUE;
-        double err;
-
-        // Loop over features.
-        for (int j=0;j<nFeat;j++) {
-
-            // Find minimum total error.
-            err = (err_face[j]+err_Nface[j]);
-            if(err<minErr) {
-                minErr = err;
-                tr.ind = j;
-            }
-        }
-
-        tr.err = minErr;
-        return tr;
     }
 
     /*
