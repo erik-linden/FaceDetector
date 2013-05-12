@@ -64,7 +64,7 @@ public class ImageScanner {
 		    JFrame frame = new JFrame();
 		    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		    frame.getContentPane().setLayout(new FlowLayout());
-		    frame.getContentPane().add(new JLabel(drawBoundingBoxes(ImageIO.read(file), list, 1)));
+		    frame.getContentPane().add(new JLabel(new ImageIcon(drawBoundingBoxes(ImageIO.read(file), list, 1))));
 		    frame.pack();
 		    frame.setVisible(true);
 		}
@@ -137,7 +137,7 @@ public class ImageScanner {
 		return true;
 	}
 
-	static ImageIcon drawBoundingBoxes(BufferedImage srcImage, List<Detection> list, double scaleFactor) {
+	static Image drawBoundingBoxes(BufferedImage srcImage, List<Detection> list, double scaleFactor) {
 
 		int width = srcImage.getWidth();
 		int height = srcImage.getHeight();
@@ -162,8 +162,8 @@ public class ImageScanner {
 			}
 		}
 		
-		return new ImageIcon(img.getScaledInstance((int) (width * scaleFactor),
-				(int) (height * scaleFactor), Image.SCALE_SMOOTH));
+		return img.getScaledInstance((int) (width * scaleFactor),
+				(int) (height * scaleFactor), Image.SCALE_SMOOTH);
 
 	}
 }
