@@ -364,11 +364,6 @@ public class HaarFeatureComputer {
 		return img;
     }
 
-	private static JFrame showFeatureImg(int ind) {
-		double[] img = getFeatureImg(ind);
-		return IntegralImage.showImg(img, MIN_PATCH_SIDE, MIN_PATCH_SIDE, 10);
-	}
-
 	public static JFrame showClassifierImg(List<WeakClassifier> classifier) {
 
 		double[] imgTemp = getFeatureImg(classifier.get(0).index);
