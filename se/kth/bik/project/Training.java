@@ -66,17 +66,17 @@ public class Training {
         int i = 0;
         int n = 0;
 
-        double fp_i = 1;
-        double tp_i = 1;
+        double fp = 1;
+        double tp = 1;
         double thld_adj = 0.1;
-        double fp_im;
-        double tp_im;
+        double prev_fp;
+        double prev_tp;
 
-        while (fp_i > fp_target && i < nLayers) {
+        while (fp > fp_target && i < nLayers) {
             i++;
-            fp_im = fp_i;
-            tp_im = tp_i;
-            while (fp_i > f * fp_im && n < nClassifiers) {
+            prev_fp = fp;
+            prev_tp = tp;
+            while (fp > f * prev_fp && n < nClassifiers) {
                 n++;
                 long startTime = System.currentTimeMillis();
 
@@ -86,29 +86,29 @@ public class Training {
                         selectAndTrainWeakClassifier(fv_face, fv_Nface, w_face,
                                 w_Nface, mu_p, mu_n, thld, p, err_face, err_Nface));
 
-                tp_i = Double.MAX_VALUE;
+                tp = Double.MAX_VALUE;
                 double step = 0.0001;
-                while (tp_i > d * tp_im) {
+                while (tp > d * prev_tp) {
                     thld_adj += step;
-                    tp_i = ((double)testCascade(fv_face, classifier,
+                    tp = ((double)testCascade(fv_face, classifier,
                             cascadeLevels,  cascadeThlds, thld_adj))/((double)nFaces);
                 }
-                while (tp_i < d * tp_im && thld_adj>0) {
+                while (tp < d * prev_tp && thld_adj>0) {
                     thld_adj -= step;
-                    tp_i = ((double)testCascade(fv_face, classifier,
+                    tp = ((double)testCascade(fv_face, classifier,
                             cascadeLevels, cascadeThlds, thld_adj))/((double)nFaces);
                 }
 
-                System.out.println("TPR: "+tp_i+" with thld adj "+thld_adj);
+                System.out.println("TPR: "+tp+" with thld adj "+thld_adj);
 
                 if (thld_adj <= 0) {
-                    fp_i = fp_im*2;
+                    fp = prev_fp*2;
                 }
                 else {
-                    fp_i = testCascade(fv_Nface, classifier,
+                    fp = testCascade(fv_Nface, classifier,
                             cascadeLevels, cascadeThlds, thld_adj);
-                    System.out.println(fp_i);
-                    fp_i = fp_i/((double)nNFaces);
+                    System.out.println(fp);
+                    fp = fp/((double)nNFaces);
                 }
 
                 if (frame != null) {
@@ -117,7 +117,7 @@ public class Training {
                 }
 //                frame = HaarFeature.showClassifierImg(classifier);
 
-                System.out.println("FPR: "+fp_i+" with thld adj "+thld_adj);
+                System.out.println("FPR: "+fp+" with thld adj "+thld_adj);
 
                 System.out.println((System.currentTimeMillis()-startTime));
 
