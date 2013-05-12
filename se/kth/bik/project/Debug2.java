@@ -17,12 +17,12 @@ public class Debug2 {
 
     public static void main(String[] args) throws IOException {
         IntegralImage iim = IntegralImage.makeIntegralImage(new File(FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages", "FACES", "face00001.bmp")));
-        HaarFeature.init();
-        HaarFeature hf = new HaarFeature(iim);
-        System.out.println(hf.typeI(x, y, w, h));
-        System.out.println(hf.typeII(x, y, w, h));
-        System.out.println(hf.typeIII(x, y, w, h));
-        System.out.println(hf.typeIV(x, y, w, h));
+        HaarFeatureComputer.init();
+        HaarFeatureComputer hfc = new HaarFeatureComputer(iim);
+        System.out.println(hfc.typeI(x, y, w, h));
+        System.out.println(hfc.typeII(x, y, w, h));
+        System.out.println(hfc.typeIII(x, y, w, h));
+        System.out.println(hfc.typeIV(x, y, w, h));
         System.out.println("Finished");
     }
 

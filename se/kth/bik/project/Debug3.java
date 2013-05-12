@@ -39,9 +39,9 @@ public class Debug3 {
                             "TrainingImages", "FACES",
                             String.format("face%05d.bmp", fileNo + 1)));
             IntegralImage img = IntegralImage.makeIntegralImage(file);
-            HaarFeature fet = new HaarFeature(img);
+            HaarFeatureComputer hfc = new HaarFeatureComputer(img);
 
-            fs[fileNo] = fet.computeFeature(type, x, y, w, h);
+            fs[fileNo] = hfc.computeFeature(type, x, y, w, h);
         }
 
         double epsilon = 1E-1;

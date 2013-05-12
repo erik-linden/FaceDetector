@@ -20,7 +20,7 @@ import javax.swing.JLabel;
 
 public class ImageScanner {
 
-	HaarFeature f;
+	HaarFeatureComputer featureComputer;
 	CascadeClassifier classifier;
 	double pixelSkip = 1.0;
 	double scaleSkip = 1.10;
@@ -38,7 +38,7 @@ public class ImageScanner {
 		ImageScanner imgScanner = new ImageScanner();
 		imgScanner.classifier = (CascadeClassifier) tr;
 		
-		HaarFeature.init();
+		HaarFeatureComputer.init();
 
 		if(true) {
 		    List<BufferedImage> images = new ArrayList<BufferedImage>(folder.listFiles().length);
@@ -50,7 +50,7 @@ public class ImageScanner {
 		} else {
 		    File file = folder.listFiles()[7];
 
-		    imgScanner.f = new HaarFeature(IntegralImage.makeIntegralImage(file));
+		    imgScanner.featureComputer = new HaarFeatureComputer(IntegralImage.makeIntegralImage(file));
 
 		    long startTime = System.currentTimeMillis();
 		    List<Detection> list = imgScanner.scan();
@@ -74,7 +74,7 @@ public class ImageScanner {
     public long testPerformance(Iterable<BufferedImage> images) {
         long startTime = System.currentTimeMillis();
         for(BufferedImage image : images) {
-            f = new HaarFeature(new IntegralImage(image));
+            featureComputer = new HaarFeatureComputer(new IntegralImage(image));
             scan();
         }
         return System.currentTimeMillis() - startTime;
@@ -85,14 +85,14 @@ public class ImageScanner {
 		int nTests = 0;
 		double scale = startScale;
 
-		int w = (int) Math.round(((double)HaarFeature.MIN_PATCH_SIDE)*scale);
-		while (w<=Math.min(f.img.getHeight(), f.img.getWidth())) {
+		int w = (int) Math.round(((double)HaarFeatureComputer.MIN_PATCH_SIDE)*scale);
+		while (w<=Math.min(featureComputer.img.getHeight(), featureComputer.img.getWidth())) {
 			int x=0;
-			while (x<(f.img.getWidth()-w)) {
+			while (x<(featureComputer.img.getWidth()-w)) {
 				int y=0;
-				while (y<(f.img.getHeight()-w)) {
-                    f.setROI(x, y, w);
-					if (classifier.classifyPatch(f, thld_gain)) {
+				while (y<(featureComputer.img.getHeight()-w)) {
+                    featureComputer.setROI(x, y, w);
+					if (classifier.classifyPatch(featureComputer, thld_gain)) {
 						list.add(new Detection(x,y,w));
 					}
 					nTests++;
@@ -101,7 +101,7 @@ public class ImageScanner {
 				x = (int) (x+Math.round(pixelSkip*scale));
 			}
 			scale *= scaleSkip;
-			w = (int) Math.round(((double)HaarFeature.MIN_PATCH_SIDE)*scale);
+			w = (int) Math.round(((double)HaarFeatureComputer.MIN_PATCH_SIDE)*scale);
 		}
 		Common.debugPrint("Tested "+nTests+" locations");
 		return list;

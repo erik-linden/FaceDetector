@@ -39,13 +39,13 @@ public class CascadeClassifier implements java.io.Serializable {
         thldAdjustments = cascadeThlds.toArray(new Double[0]);
     }
 
-    public boolean classifyPatch(HaarFeature feature, double thld_gain) {
+    public boolean classifyPatch(HaarFeatureComputer featureComputer, double thld_gain) {
         double sumH = 0;
         double sumA = 0;
 
         for(int i = 0; i < layers.length; ++i) {
             for(WeakClassifier c : layers[i]) {
-                if(c.classify(feature)) {
+                if(c.classify(featureComputer)) {
                     sumH += c.alpha;
                 }
                 sumA += c.alpha;

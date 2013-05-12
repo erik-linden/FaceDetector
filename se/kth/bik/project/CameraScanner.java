@@ -15,7 +15,7 @@ public class CameraScanner {
 
 	public static void main(String[] args) {
 
-		HaarFeature.init();
+		HaarFeatureComputer.init();
 
 		JFrame frame = new JFrame();
 		ImageIcon icon = new ImageIcon();
@@ -34,7 +34,7 @@ public class CameraScanner {
 
 			IntegralImage img = new IntegralImage(srcImage);
 			ImageScanner imgScanner = new ImageScanner();
-			imgScanner.f = new HaarFeature(img);
+			imgScanner.featureComputer = new HaarFeatureComputer(img);
 			imgScanner.thld_gain = 1.45;
 			imgScanner.startScale = 3;
 			imgScanner.scaleSkip = 1.20;
@@ -49,7 +49,7 @@ public class CameraScanner {
 			for(int i=0;i<100;) {
 				long startTime = System.currentTimeMillis();
 				srcImage = grabber.grab().getBufferedImage();
-				imgScanner.f.img.setSrcImage(srcImage);
+				imgScanner.featureComputer.img.setSrcImage(srcImage);
 				List<Detection> list = imgScanner.scan();
 				System.out.println((System.currentTimeMillis()-startTime));
 

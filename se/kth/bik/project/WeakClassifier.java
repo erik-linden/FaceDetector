@@ -36,13 +36,13 @@ public class WeakClassifier implements java.io.Serializable {
 	}
 
     /**
-     * @param feature
-     *            the {@link HaarFeature} instance which will compute the
+     * @param featureComputer
+     *            the {@link HaarFeatureComputer} instance which will compute the
      *            feature value.
      * @return <code>true</code> if the feature value computed by
      *         <code>feature</code> is classified as a face by this classifier.
      */
-	public boolean classify(HaarFeature feature) {
-	    return classify(feature.computeFeature(index));
+	public boolean classify(HaarFeatureComputer featureComputer) {
+	    return classify(featureComputer.computeFeature(index));
 	}
 }

@@ -16,7 +16,7 @@ public class Training {
     private static final double THRESHOLD_ADJUSTMENT_STEPSIZE = 0.0001;
     private static final int MAX_NUMBER_OF_LAYERS = 20;
     private static final int MAX_NUMBER_OF_WEAK_CLASSIFIERS = 500;
-    private static final int NUMBER_OF_FEATURES = HaarFeature.NO_FEATURES;
+    private static final int NUMBER_OF_FEATURES = HaarFeatureComputer.NO_FEATURES;
 
     /**
      * @param args
@@ -32,7 +32,7 @@ public class Training {
     }
 
     static CascadeClassifier train() throws IOException {
-        HaarFeature.init();
+        HaarFeatureComputer.init();
 
         double[][] fv_face = makeFeatureVector(
                 FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages", "FACES"),
@@ -404,10 +404,10 @@ public class Training {
 
         for(int fileNo = 0; fileNo < nFiles; fileNo++) {
             IntegralImage img = IntegralImage.makeIntegralImage(listOfFiles[fileNo]);
-            HaarFeature fet = new HaarFeature(img);
+            HaarFeatureComputer hfc = new HaarFeatureComputer(img);
 
             for(int ind = 0; ind < NUMBER_OF_FEATURES; ind++) {
-                fv[fileNo][ind] = fet.computeFeature(ind);
+                fv[fileNo][ind] = hfc.computeFeature(ind);
             }
         }
 
