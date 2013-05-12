@@ -91,7 +91,8 @@ public class ImageScanner {
 			while (x<(f.img.getWidth()-w)) {
 				int y=0;
 				while (y<(f.img.getHeight()-w)) {
-					if (testPatch(x,y,w)) {
+                    f.setROI(x, y, w);
+					if (classifier.classifyPatch(f, thld_gain)) {
 						list.add(new Detection(x,y,w));
 					}
 					nTests++;
@@ -101,43 +102,12 @@ public class ImageScanner {
 			}
 			scale *= scaleSkip;
 			w = (int) Math.round(((double)HaarFeature.MIN_PATCH_SIDE)*scale);
-		}		
+		}
 		Common.debugPrint("Tested "+nTests+" locations");
 		return list;
 	}
 
-	private boolean testPatch(int x, int y, int w) {
-
-		f.setROI(x, y, w);
-
-		double sumH = 0;
-		double sumA = 0;
-		int n = 0;
-		int nLayers = classifier.cascadeLevels.size();
-		
-		for (int l=0;l<nLayers;l++) {
-
-			while(n<classifier.cascadeLevels.get(l)) {
-				WeakClassifier c = classifier.weakClassifiers.get(n);
-				if(c.classify(f)) {
-					sumH += c.alpha;
-				}
-				sumA += c.alpha;
-				
-				n++;
-			}
-			
-			double thld_adj = classifier.cascadeThlds.get(l);
-			if(sumH<sumA/2*thld_adj*thld_gain) {
-				return false;
-			}
-
-		}
-		
-		return true;
-	}
-
-	static ImageIcon drawBoundingBoxes(BufferedImage srcImage, List<Detection> list, double scaleFactor) {
+    static ImageIcon drawBoundingBoxes(BufferedImage srcImage, List<Detection> list, double scaleFactor) {
 
 		int width = srcImage.getWidth();
 		int height = srcImage.getHeight();

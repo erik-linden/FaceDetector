@@ -20,4 +20,32 @@ public class CascadeClassifier implements java.io.Serializable  {
 		this.cascadeLevels = cascadeLevels;
 		this.cascadeThlds = cascadeThlds;
 	}
+
+    boolean classifyPatch(HaarFeature feature, double thld_gain) {
+        double sumH = 0;
+	double sumA = 0;
+	int n = 0;
+	int nLayers = cascadeLevels.size();
+
+	for (int l=0;l<nLayers;l++) {
+
+		while(n<cascadeLevels.get(l)) {
+			WeakClassifier c = weakClassifiers.get(n);
+			if(c.classify(feature)) {
+				sumH += c.alpha;
+			}
+			sumA += c.alpha;
+
+			n++;
+		}
+
+		double thld_adj = cascadeThlds.get(l);
+		if(sumH<sumA/2*thld_adj*thld_gain) {
+			return false;
+		}
+
+	}
+
+	return true;
+    }
 }
