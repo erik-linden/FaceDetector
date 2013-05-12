@@ -16,8 +16,7 @@ public class Training {
     private static final double THRESHOLD_ADJUSTMENT_STEPSIZE = 0.0001;
     private static final int MAX_NUMBER_OF_LAYERS = 20;
     private static final int MAX_NUMBER_OF_WEAK_CLASSIFIERS = 500;
-
-    static int nFeat = HaarFeature.NO_FEATURES;
+    private static final int NUMBER_OF_FEATURES = HaarFeature.NO_FEATURES;
 
     /**
      * @param args
@@ -50,12 +49,12 @@ public class Training {
         initWeights(w_face, 1/(2*((double)nFaces)));
         initWeights(w_Nface, 1/(2*((double)nNFaces)));
 
-        double[] mu_p = new double[nFeat];
-        double[] mu_n = new double[nFeat];
-        double[] thld = new double[nFeat];
-        int[] p = new int[nFeat];
-        double[] err_face   = new double[nFeat];
-        double[] err_Nface  = new double[nFeat];
+        double[] mu_p = new double[NUMBER_OF_FEATURES];
+        double[] mu_n = new double[NUMBER_OF_FEATURES];
+        double[] thld = new double[NUMBER_OF_FEATURES];
+        int[] p = new int[NUMBER_OF_FEATURES];
+        double[] err_face   = new double[NUMBER_OF_FEATURES];
+        double[] err_Nface  = new double[NUMBER_OF_FEATURES];
         List<WeakClassifier> classifier = new ArrayList<WeakClassifier>();
         List<Integer> cascadeLevels = new ArrayList<Integer>();
         List<Double> cascadeThlds = new ArrayList<Double>();
@@ -170,7 +169,7 @@ public class Training {
         double err;
 
         // Loop over features.
-        for (int j=0;j<nFeat;j++) {
+        for (int j=0;j<NUMBER_OF_FEATURES;j++) {
 
             // Find minimum total error.
             err = (err_face[j]+err_Nface[j]);
@@ -316,7 +315,7 @@ public class Training {
             double[] err, boolean pos) {
 
         // Start by zeroing all errors.
-        for (int j=0;j<nFeat;j++) {
+        for (int j=0;j<NUMBER_OF_FEATURES;j++) {
             err[j] = 0;
         }
 
@@ -324,7 +323,7 @@ public class Training {
         for(int i=0;i<fv_face.length;i++)  {
 
             // Loop over features.
-            for (int j=0;j<nFeat;j++) {
+            for (int j=0;j<NUMBER_OF_FEATURES;j++) {
 
                 // If a positive example fails detection.
                 if (pos && p[j]*fv_face[i][j]<p[j]*thld[j]) {
@@ -348,7 +347,7 @@ public class Training {
             double[] thld, int[] p) {
 
         // Loop over all features.
-        for (int j=0;j<nFeat;j++) {
+        for (int j=0;j<NUMBER_OF_FEATURES;j++) {
             thld[j] = (mu_p[j]+mu_n[j])/2;
 
             // Heuristics (good) for setting
@@ -368,7 +367,7 @@ public class Training {
     static void weightedMean(double[] w, double[][] fv_face, double[] mu) {
 
         // Set everything to zero
-        for (int j=0;j<nFeat;j++) {
+        for (int j=0;j<NUMBER_OF_FEATURES;j++) {
             mu[j] = 0;
         }
 
@@ -378,7 +377,7 @@ public class Training {
         for (int i=0;i<fv_face.length;i++) {
 
             // Loop over features
-            for (int j=0;j<nFeat;j++) {
+            for (int j=0;j<NUMBER_OF_FEATURES;j++) {
                 mu[j] += w[i]*fv_face[i][j];
             }
 
@@ -386,7 +385,7 @@ public class Training {
         }
 
         // Normalize
-        for (int j=0;j<nFeat;j++) {
+        for (int j=0;j<NUMBER_OF_FEATURES;j++) {
             mu[j] /= w_sum;
         }
     }
@@ -401,13 +400,13 @@ public class Training {
         File[] listOfFiles = folder.listFiles();
 
         int nFiles = Math.min(listOfFiles.length, nMax);
-        double[][] fv = new double[nFiles][nFeat];
+        double[][] fv = new double[nFiles][NUMBER_OF_FEATURES];
 
         for(int fileNo = 0; fileNo < nFiles; fileNo++) {
             IntegralImage img = IntegralImage.makeIntegralImage(listOfFiles[fileNo]);
             HaarFeature fet = new HaarFeature(img);
 
-            for(int ind = 0; ind < nFeat; ind++) {
+            for(int ind = 0; ind < NUMBER_OF_FEATURES; ind++) {
                 fv[fileNo][ind] = fet.computeFeature(ind);
             }
         }
