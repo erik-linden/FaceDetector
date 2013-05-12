@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 
 public class Training {
 
+    private static final double FALSE_POSITIVE_CHANCE_TARGET = 1e-3;
     private static final double THRESHOLD_ADJUSTMENT_STEPSIZE = 0.0001;
     static int nFeat = HaarFeature.NO_FEATURES;
 
@@ -58,7 +59,6 @@ public class Training {
 
         JFrame frame = null;
 
-        double fp_target = 1e-3;
         double f = 0.75;
         double d = 0.999;
         int nLayers = 20;
@@ -73,7 +73,7 @@ public class Training {
         double prev_fp;
         double prev_tp;
 
-        while (fp > fp_target && i < nLayers) {
+        while (fp > FALSE_POSITIVE_CHANCE_TARGET && i < nLayers) {
             i++;
             prev_fp = fp;
             prev_tp = tp;
