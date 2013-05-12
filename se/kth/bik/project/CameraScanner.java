@@ -54,7 +54,7 @@ public class CameraScanner {
 				System.out.println((System.currentTimeMillis()-startTime));
 
 				System.out.println("Found: "+list.size());
-				ImageScanner.drawBoundingBoxes(srcImage, list, 1);
+				icon.setImage(ImageScanner.drawBoundingBoxes(srcImage, list, 1));
 				frame.repaint();
 				frame.setSize(srcImage.getWidth(), srcImage.getHeight());
 			}
