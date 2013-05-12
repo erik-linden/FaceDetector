@@ -32,18 +32,8 @@ public class HaarFeatureComputer {
 		IntegralImage img = IntegralImage.makeIntegralImage(file);
 		HaarFeatureComputer fet = new HaarFeatureComputer(img);
 
-		int nFeatures = 42310/100;
-		double[] f   = new double[nFeatures];
-		int[] ind = new int[nFeatures];
-
-		for(int i=0;i<ind.length;i++) {
-			ind[i] = i;
-		}
-
-		fet.getFeatures(ind, f);
-
-		for(int i=0;i<ind.length;i++) {
-			System.out.println(f[i]*100);
+		for(int i=0;i<NO_FEATURES;i++) {
+			System.out.println(fet.computeFeature(i)*100);
 		}
 
 
@@ -88,12 +78,6 @@ public class HaarFeatureComputer {
 		}
 		else {
 			patch_std = Math.sqrt(meanSqr-Math.pow(patch_mean,2));
-		}
-	}
-
-	void getFeatures(int[] ind, double[] f) {
-		for(int i=0;i<ind.length;i++) {
-			f[i] = computeFeature(ind[i]);
 		}
 	}
 
