@@ -17,11 +17,15 @@ public class WeakClassifier implements java.io.Serializable {
 		this.alpha = alpha;
 	}
 
+	private boolean classify(double featureValue) {
+	    return parity * featureValue > parity * thld;
+	}
+
 	public boolean classify(double[] fv) {
-	    return parity * fv[index] > parity * thld;
+	    return classify(fv[index]);
 	}
 
 	public boolean classify(HaarFeature feature) {
-	    return parity * feature.computeFeature(index) > parity * thld;
+	    return classify(feature.computeFeature(index));
 	}
 }
