@@ -242,28 +242,6 @@ public class Training {
         return sumDetection;
     }
 
-    private static int testClassifier(double[][] fv_face, int n, List<WeakClassifier> classifier, double thld_adj) {
-
-        int sumDetection = 0;
-        for (int i=0;i<n;i++) {
-
-            double sumH = 0;
-            double sumA = 0;
-            for(WeakClassifier c : classifier) {
-                if(c.parity*fv_face[i][c.index] > c.parity*c.thld) {
-                    sumH += c.alpha;
-                }
-                sumA += c.alpha;
-            }
-            if(sumH>=sumA/2*thld_adj) {
-                sumDetection++;
-            }
-        }
-        return sumDetection;
-
-
-    }
-
     /*
      * Lowers the weight on correctly classified training data.
      */
