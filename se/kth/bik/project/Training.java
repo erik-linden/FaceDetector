@@ -14,6 +14,9 @@ public class Training {
 
     private static final double FALSE_POSITIVE_CHANCE_TARGET = 1e-3;
     private static final double THRESHOLD_ADJUSTMENT_STEPSIZE = 0.0001;
+    private static final int MAX_NUMBER_OF_LAYERS = 20;
+    private static final int MAX_NUMBER_OF_WEAK_CLASSIFIERS = 500;
+
     static int nFeat = HaarFeature.NO_FEATURES;
 
     /**
@@ -61,8 +64,6 @@ public class Training {
 
         double f = 0.75;
         double d = 0.999;
-        int nLayers = 20;
-        int nClassifiers = 500;
 
         int i = 0;
         int n = 0;
@@ -73,11 +74,11 @@ public class Training {
         double prev_fp;
         double prev_tp;
 
-        while (fp > FALSE_POSITIVE_CHANCE_TARGET && i < nLayers) {
+        while (fp > FALSE_POSITIVE_CHANCE_TARGET && i < MAX_NUMBER_OF_LAYERS) {
             i++;
             prev_fp = fp;
             prev_tp = tp;
-            while (fp > f * prev_fp && n < nClassifiers) {
+            while (fp > f * prev_fp && n < MAX_NUMBER_OF_WEAK_CLASSIFIERS) {
                 n++;
                 long startTime = System.currentTimeMillis();
 
@@ -124,12 +125,12 @@ public class Training {
 
             }
 
-            if (n <= nClassifiers) {
+            if (n <= MAX_NUMBER_OF_WEAK_CLASSIFIERS) {
                 cascadeLevels.add(n);
                 cascadeThlds.add(thld_adj);
                 System.out.println("Layer "+i+" at "+(n)+" classifiers with thld adj="+thld_adj);
             }
-            if (n == nClassifiers) {
+            if (n == MAX_NUMBER_OF_WEAK_CLASSIFIERS) {
                 break;
             }
         }
