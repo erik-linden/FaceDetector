@@ -47,7 +47,7 @@ public class HaarFeatureComputer {
 	 * 
 	 * @param newImg
 	 */
-	HaarFeatureComputer(IntegralImage newImg) {
+	public HaarFeatureComputer(IntegralImage newImg) {
 		img = newImg;
 		setROI(0, 0, Math.min(img.getWidth(), img.getHeight()));
 	}
@@ -60,7 +60,7 @@ public class HaarFeatureComputer {
 	 * @param y ROI x-origin
 	 * @param w ROI side length
 	 */
-	void setROI(int x, int y, int w) {
+	public void setROI(int x, int y, int w) {
 		origin_x = x;
 		origin_y = y;		
 		patch_scale = ((double)w)/((double)MIN_PATCH_SIDE);
@@ -88,7 +88,7 @@ public class HaarFeatureComputer {
 	 * @param ind feature number
 	 * @return	feature value
 	 */
-	double computeFeature(int ind) {
+	public double computeFeature(int ind) {
 		ind *= 5;
 		int type = FEATURE_TABLE[ind];
 		int x = FEATURE_TABLE[ind+1];
@@ -99,7 +99,7 @@ public class HaarFeatureComputer {
 		return computeFeature(type, x, y, w, h);
 	}
 
-    double computeFeature(int type, int x, int y, int w, int h) {
+    public double computeFeature(int type, int x, int y, int w, int h) {
         // Scale the feature to fit the current patch.
 		x = (int) Math.round(origin_x + x*patch_scale);
 		y = (int) Math.round(origin_y + y*patch_scale);
@@ -134,7 +134,7 @@ public class HaarFeatureComputer {
 	 * @param h
 	 * @return
 	 */
-	double typeI(int x, int y, int w, int h) {
+	public double typeI(int x, int y, int w, int h) {
 
 		double sumU = img.integral(x,y,w,h);
 		double sumD = img.integral(x,y+h,w,h);
@@ -156,7 +156,7 @@ public class HaarFeatureComputer {
 	 * @param h
 	 * @return
 	 */
-	double typeII(int x, int y, int w, int h) {
+	public double typeII(int x, int y, int w, int h) {
 
 		double sumL = img.integral(x,y,w,h);
 		double sumR = img.integral(x+w,y,w,h);
@@ -178,7 +178,7 @@ public class HaarFeatureComputer {
 	 * @param h
 	 * @return
 	 */
-	double typeIII(int x, int y, int w, int h) {
+	public double typeIII(int x, int y, int w, int h) {
 
 		double sumL = img.integral(x,y,w,h);
 		double sumC = img.integral(x+w,y,w,h);
@@ -207,7 +207,7 @@ public class HaarFeatureComputer {
 	 * @param h
 	 * @return
 	 */
-	double typeIV(int x, int y, int w, int h) {
+	public double typeIV(int x, int y, int w, int h) {
 
 		double sumLU = img.integral(x,y,w,h);
 		double sumRU = img.integral(x+w,y,w,h);
@@ -223,7 +223,7 @@ public class HaarFeatureComputer {
 	 * before any feature value calculations can be made.
 	 * 
 	 */
-	static void init() {
+	public static void init() {
 		int i = 0;
 		//Type 1
 		for(int w=1; w<=MIN_PATCH_SIDE; w++) {
@@ -290,7 +290,7 @@ public class HaarFeatureComputer {
 		}
 	}
 
-	static double[] getFeatureImg(int ind) {
+	private static double[] getFeatureImg(int ind) {
 
 	    ind *= 5;
 	    int type = FEATURE_TABLE[ind];
@@ -364,12 +364,12 @@ public class HaarFeatureComputer {
 		return img;
     }
 
-	static JFrame showFeatureImg(int ind) {
+	private static JFrame showFeatureImg(int ind) {
 		double[] img = getFeatureImg(ind);
 		return IntegralImage.showImg(img, MIN_PATCH_SIDE, MIN_PATCH_SIDE, 10);
 	}
 
-	static JFrame showClassifierImg(List<WeakClassifier> classifier) {
+	public static JFrame showClassifierImg(List<WeakClassifier> classifier) {
 
 		double[] imgTemp = getFeatureImg(classifier.get(0).index);
 		int length = imgTemp.length;
