@@ -3,58 +3,60 @@ package se.kth.bik.project;
 import java.util.Iterator;
 import java.util.List;
 
+public class CascadeClassifier implements java.io.Serializable {
 
-public class CascadeClassifier implements java.io.Serializable  {
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
-	
-	private WeakClassifier[][] layers;
-	private Double[] thldAdjustments;
+    private static final long serialVersionUID = 1L;
 
-	public CascadeClassifier(List<WeakClassifier> weakClassifiers,
-			List<Integer> cascadeLevels, List<Double> cascadeThlds) {
+    private WeakClassifier[][] layers;
+    private Double[] thldAdjustments;
 
-		layers = new WeakClassifier[cascadeLevels.size()][];
+    public CascadeClassifier(List<WeakClassifier> weakClassifiers,
+            List<Integer> cascadeLevels,
+            List<Double> cascadeThlds) {
 
-		Iterator<WeakClassifier> classifierIterator = weakClassifiers.iterator();
-		Iterator<Integer> layerIterator = cascadeLevels.iterator();
+        layers = new WeakClassifier[cascadeLevels.size()][];
 
-		int prevLayerEnd = 0;
-		int i=0;
-		for(int layer=0; layerIterator.hasNext(); ++layer) {
-		    int layerEnd = layerIterator.next();
-		    layers[layer] = new WeakClassifier[layerEnd - prevLayerEnd];
+        Iterator<WeakClassifier> classifierIterator =
+                weakClassifiers.iterator();
+        Iterator<Integer> layerIterator = cascadeLevels.iterator();
 
-		    for(; i<layerEnd; ++i) {
-		        layers[layer][i - prevLayerEnd] = classifierIterator.next();
-		    }
+        int prevLayerEnd = 0;
+        int i = 0;
+        for(int layer = 0; layerIterator.hasNext(); ++layer) {
+            int layerEnd = layerIterator.next();
+            layers[layer] = new WeakClassifier[layerEnd - prevLayerEnd];
 
-		    prevLayerEnd = layerEnd;
-		}
+            for(; i < layerEnd; ++i) {
+                layers[layer][i - prevLayerEnd] = classifierIterator.next();
+            }
 
-		thldAdjustments = cascadeThlds.toArray(new Double[0]);
-	}
+            prevLayerEnd = layerEnd;
+        }
+
+        thldAdjustments = cascadeThlds.toArray(new Double[0]);
+    }
 
     public boolean classifyPatch(HaarFeature feature, double thld_gain) {
         double sumH = 0;
-	double sumA = 0;
+        double sumA = 0;
 
-	for(int i=0; i<layers.length; ++i) {
-	    for(WeakClassifier c : layers[i]) {
-			if(c.classify(feature)) {
-				sumH += c.alpha;
-			}
-			sumA += c.alpha;
-		}
+        for(int i = 0; i < layers.length; ++i) {
+            for(WeakClassifier c : layers[i]) {
+                if(c.classify(feature)) {
+                    sumH += c.alpha;
+                }
+                sumA += c.alpha;
+            }
 
-		if(sumH<sumA/2*thldAdjustments[i]*thld_gain) {
-			return false;
-		}
-	}
+            if(sumH < sumA / 2 * thldAdjustments[i] * thld_gain) {
+                return false;
+            }
+        }
 
-	return true;
+        return true;
     }
 
 }
