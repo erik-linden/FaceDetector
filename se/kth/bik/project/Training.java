@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 
 public class Training {
 
+    private static final double THRESHOLD_ADJUSTMENT_STEPSIZE = 0.0001;
     static int nFeat = HaarFeature.NO_FEATURES;
 
     /**
@@ -87,14 +88,13 @@ public class Training {
                                 w_Nface, mu_p, mu_n, thld, p, err_face, err_Nface));
 
                 tp = Double.MAX_VALUE;
-                double step = 0.0001;
                 while (tp > d * prev_tp) {
-                    thld_adj += step;
+                    thld_adj += THRESHOLD_ADJUSTMENT_STEPSIZE;
                     tp = ((double)testCascade(fv_face, classifier,
                             cascadeLevels,  cascadeThlds, thld_adj))/((double)nFaces);
                 }
                 while (tp < d * prev_tp && thld_adj>0) {
-                    thld_adj -= step;
+                    thld_adj -= THRESHOLD_ADJUSTMENT_STEPSIZE;
                     tp = ((double)testCascade(fv_face, classifier,
                             cascadeLevels, cascadeThlds, thld_adj))/((double)nFaces);
                 }
