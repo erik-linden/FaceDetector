@@ -9,9 +9,9 @@ public class CascadeClassifier implements java.io.Serializable  {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	List<WeakClassifier> weakClassifiers;
-	List<Integer> cascadeLevels;
-	List<Double> cascadeThlds;
+	private List<WeakClassifier> weakClassifiers;
+	private List<Integer> cascadeLevels;
+	private List<Double> cascadeThlds;
 
 	public CascadeClassifier(List<WeakClassifier> weakClassifiers,
 			List<Integer> cascadeLevels, List<Double> cascadeThlds) {
