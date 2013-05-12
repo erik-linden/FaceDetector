@@ -8,15 +8,16 @@ import javax.swing.JFrame;
 
 public class HaarFeature {
 
-	static int MIN_PATCH_SIDE = 19; //Smallest block size
-	static int NO_FEATURES = 53130;
-	static int[] FEATURE_TABLE = new int[NO_FEATURES*5];
-	IntegralImage img;
-	int origin_x = 0;
-	int origin_y = 0;
-	double patch_scale;
-	double patch_mean;
-	double patch_std;
+	public static final int MIN_PATCH_SIDE = 19; //Smallest block size
+	public static final int NO_FEATURES = 53130;
+	public static int[] FEATURE_TABLE = new int[NO_FEATURES*5];
+
+	public IntegralImage img;
+	private int origin_x = 0;
+	private int origin_y = 0;
+	private double patch_scale;
+	private double patch_mean;
+	private double patch_std;
 
 	/**
 	 * For testing.
