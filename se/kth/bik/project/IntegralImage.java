@@ -38,7 +38,7 @@ public class IntegralImage {
 		img.drawIntegralImage(10);
 	}
 	
-	static IntegralImage makeIntegralImage(File file) throws IOException {
+	public static IntegralImage makeIntegralImage(File file) throws IOException {
 		BufferedImage srcImage = ImageIO.read(file);
 		return new IntegralImage(srcImage);
 	}
@@ -205,7 +205,7 @@ public class IntegralImage {
     	return A+C-B-D;			
     }
 
-    static JFrame showImg(double[] img, int width, int height, double scaleFactor) {
+    public static JFrame showImg(double[] img, int width, int height, double scaleFactor) {
 		// Find the smallest and largest values.
 				double min = Double.MAX_VALUE;
 				double max = Double.MIN_VALUE;

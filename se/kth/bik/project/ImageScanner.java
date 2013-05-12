@@ -80,7 +80,7 @@ public class ImageScanner {
         return System.currentTimeMillis() - startTime;
     }
 
-	List<Detection> scan() {
+	public List<Detection> scan() {
 		List<Detection> list = new LinkedList<Detection>();
 		int nTests = 0;
 		double scale = startScale;
@@ -107,7 +107,7 @@ public class ImageScanner {
 		return list;
 	}
 
-    static ImageIcon drawBoundingBoxes(BufferedImage srcImage, List<Detection> list, double scaleFactor) {
+    public static ImageIcon drawBoundingBoxes(BufferedImage srcImage, List<Detection> list, double scaleFactor) {
 
 		int width = srcImage.getWidth();
 		int height = srcImage.getHeight();

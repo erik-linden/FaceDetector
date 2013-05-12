@@ -31,7 +31,7 @@ public class Training {
         save.close();
     }
 
-    static CascadeClassifier train() throws IOException {
+    private static CascadeClassifier train() throws IOException {
         HaarFeatureComputer.init();
 
         double[][] fv_face = makeFeatureVector(
@@ -188,7 +188,7 @@ public class Training {
         return new WeakClassifier(bestIndex,threshold,par,alpha);
     }
 
-    static int testCascade(double[][] fv_face, List<WeakClassifier> weakClassifiers,
+    private static int testCascade(double[][] fv_face, List<WeakClassifier> weakClassifiers,
             List<Integer> cascadeLevels, List<Double> cascadeThlds, double thld_adj) {
 
         int sumDetection = 0;
@@ -242,7 +242,7 @@ public class Training {
         return sumDetection;
     }
 
-    static int testClassifier(double[][] fv_face, int n, List<WeakClassifier> classifier, double thld_adj) {
+    private static int testClassifier(double[][] fv_face, int n, List<WeakClassifier> classifier, double thld_adj) {
 
         int sumDetection = 0;
         for (int i=0;i<n;i++) {
@@ -267,7 +267,7 @@ public class Training {
     /*
      * Lowers the weight on correctly classified training data.
      */
-    static double updateWeights(double[] w, double[][] fv_face,
+    private static double updateWeights(double[] w, double[][] fv_face,
             int index, int par, double thld, double err, boolean pos) {
 
         double beta = err/(1-err);
@@ -292,7 +292,7 @@ public class Training {
     /*
      *
      */
-    static void scaleWeights(double[] w, double value) {
+    private static void scaleWeights(double[] w, double value) {
         for (int j=0;j<w.length;j++) {
             w[j] *= value;
         }
@@ -301,7 +301,7 @@ public class Training {
     /*
      * Sets all weights to some starting value.
      */
-    static void initWeights(double[] w, double value) {
+    private static void initWeights(double[] w, double value) {
         for (int j=0;j<w.length;j++) {
             w[j] = value;
         }
@@ -310,7 +310,7 @@ public class Training {
     /*
      *  Finds the weighted error for each weak classifier.
      */
-    static void setError(double[] w, double[][] fv_face,
+    private static void setError(double[] w, double[][] fv_face,
             double[] thld, int[] p,
             double[] err, boolean pos) {
 
@@ -343,7 +343,7 @@ public class Training {
      * the threshold lies between the mean of the positive
      * and negative examples.
      */
-    static void setThreshold(double[] mu_p, double[] mu_n,
+    private static void setThreshold(double[] mu_p, double[] mu_n,
             double[] thld, int[] p) {
 
         // Loop over all features.
@@ -364,7 +364,7 @@ public class Training {
     /*
      * The result is placed in mu.
      */
-    static void weightedMean(double[] w, double[][] fv_face, double[] mu) {
+    private static void weightedMean(double[] w, double[][] fv_face, double[] mu) {
 
         // Set everything to zero
         for (int j=0;j<NUMBER_OF_FEATURES;j++) {
@@ -394,7 +394,7 @@ public class Training {
      * Returns an nFiles-by-nFeat array of features for at most nMax files in
      * the specified dir.
      */
-    static double[][] makeFeatureVector(String dir, int nMax) throws IOException {
+    private static double[][] makeFeatureVector(String dir, int nMax) throws IOException {
 
         File folder = new File(dir);
         File[] listOfFiles = folder.listFiles();
