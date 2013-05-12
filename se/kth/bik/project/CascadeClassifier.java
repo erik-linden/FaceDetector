@@ -1,5 +1,6 @@
 package se.kth.bik.project;
 
+import java.util.Iterator;
 import java.util.List;
 
 
@@ -9,43 +10,51 @@ public class CascadeClassifier implements java.io.Serializable  {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private List<WeakClassifier> weakClassifiers;
-	private List<Integer> cascadeLevels;
-	private List<Double> cascadeThlds;
+	private WeakClassifier[][] layers;
+	private Double[] thldAdjustments;
 
 	public CascadeClassifier(List<WeakClassifier> weakClassifiers,
 			List<Integer> cascadeLevels, List<Double> cascadeThlds) {
-		super();
-		this.weakClassifiers = weakClassifiers;
-		this.cascadeLevels = cascadeLevels;
-		this.cascadeThlds = cascadeThlds;
+
+		layers = new WeakClassifier[cascadeLevels.size()][];
+
+		Iterator<WeakClassifier> classifierIterator = weakClassifiers.iterator();
+		Iterator<Integer> layerIterator = cascadeLevels.iterator();
+
+		int prevLayerEnd = 0;
+		int i=0;
+		for(int layer=0; layerIterator.hasNext(); ++layer) {
+		    int layerEnd = layerIterator.next();
+		    layers[layer] = new WeakClassifier[layerEnd - prevLayerEnd];
+
+		    for(; i<layerEnd; ++i) {
+		        layers[layer][i - prevLayerEnd] = classifierIterator.next();
+		    }
+
+		    prevLayerEnd = layerEnd;
+		}
+
+		thldAdjustments = cascadeThlds.toArray(new Double[0]);
 	}
 
-    boolean classifyPatch(HaarFeature feature, double thld_gain) {
+    public boolean classifyPatch(HaarFeature feature, double thld_gain) {
         double sumH = 0;
 	double sumA = 0;
-	int n = 0;
-	int nLayers = cascadeLevels.size();
 
-	for (int l=0;l<nLayers;l++) {
-
-		while(n<cascadeLevels.get(l)) {
-			WeakClassifier c = weakClassifiers.get(n);
+	for(int i=0; i<layers.length; ++i) {
+	    for(WeakClassifier c : layers[i]) {
 			if(c.classify(feature)) {
 				sumH += c.alpha;
 			}
 			sumA += c.alpha;
-
-			n++;
 		}
 
-		double thld_adj = cascadeThlds.get(l);
-		if(sumH<sumA/2*thld_adj*thld_gain) {
+		if(sumH<sumA/2*thldAdjustments[i]*thld_gain) {
 			return false;
 		}
-
 	}
 
 	return true;
     }
+
 }
