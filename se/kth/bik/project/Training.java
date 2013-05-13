@@ -32,17 +32,27 @@ public class Training {
     }
 
     private static CascadeClassifier train() throws IOException {
-        HaarFeatureComputer.init();
 
+        System.out.println("Commencing training");
+        System.out.println("Initializing Haar features...");
+        HaarFeatureComputer.init();
+        System.out.println("Haar features initialized.");
+
+        System.out.println("Computing feature vectors for FACES...");
         double[][] fv_face = makeFeatureVector(
                 FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages", "FACES"),
                 10000);
         int nFaces = fv_face.length;
+        System.out.println("FACES feature vectors computed.");
 
+        System.out.println("Computing feature vectors for NFACES...");
         double[][] fv_Nface = makeFeatureVector(
                 FileUtils.combinePath(EnvironmentConstants.PROJECT_ROOT, "TrainingImages", "NFACES"),
                 10000);
         int nNFaces = fv_Nface.length;
+        System.out.println("FACES feature vectors computed.");
+
+        System.out.println("Commencing training of cascade classifier");
 
         double[] w_face = new double[nFaces];
         double[] w_Nface = new double[nNFaces];
