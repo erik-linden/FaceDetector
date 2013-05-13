@@ -17,6 +17,7 @@ public class Training {
     private static final int MAX_NUMBER_OF_LAYERS = 20;
     private static final int MAX_NUMBER_OF_WEAK_CLASSIFIERS = 500;
     private static final int NUMBER_OF_FEATURES = HaarFeatureComputer.NO_FEATURES;
+    private static final double TRUE_POSITIVE_DECREASE_TOLERANCE = 0.999;
 
     /**
      * @param args
@@ -72,7 +73,6 @@ public class Training {
         JFrame frame = null;
 
         double f = 0.75;
-        double d = 0.999;
 
         int i = 0;
         int n = 0;
@@ -98,12 +98,12 @@ public class Training {
                                 w_Nface, mu_p, mu_n, thld, p, err_face, err_Nface));
 
                 tp = Double.MAX_VALUE;
-                while (tp > d * prev_tp) {
+                while (tp > TRUE_POSITIVE_DECREASE_TOLERANCE * prev_tp) {
                     thld_adj += THRESHOLD_ADJUSTMENT_STEPSIZE;
                     tp = ((double)testCascade(fv_face, classifier,
                             cascadeLevels,  cascadeThlds, thld_adj))/((double)nFaces);
                 }
-                while (tp < d * prev_tp && thld_adj>0) {
+                while (tp < TRUE_POSITIVE_DECREASE_TOLERANCE * prev_tp && thld_adj>0) {
                     thld_adj -= THRESHOLD_ADJUSTMENT_STEPSIZE;
                     tp = ((double)testCascade(fv_face, classifier,
                             cascadeLevels, cascadeThlds, thld_adj))/((double)nFaces);
