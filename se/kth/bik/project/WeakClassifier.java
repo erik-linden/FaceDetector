@@ -45,4 +45,15 @@ public class WeakClassifier implements java.io.Serializable {
 	public boolean classify(HaarFeatureComputer featureComputer) {
 	    return classify(featureComputer.computeFeature(index));
 	}
+
+	@Override
+	public String toString() {
+	    int ind = index * 5;
+        int type = HaarFeatureComputer.FEATURE_TABLE[ind];
+        int x = HaarFeatureComputer.FEATURE_TABLE[ind+1];
+        int y = HaarFeatureComputer.FEATURE_TABLE[ind+2];
+        int w = HaarFeatureComputer.FEATURE_TABLE[ind+3];
+        int h = HaarFeatureComputer.FEATURE_TABLE[ind+4];
+	    return String.format("[WeakClassifier: (t=%d, x=%d, y=%d, w=%d, h=%d), thld=%.2f, par=%d, a=%.2f]", type, x, y, w, h, thld, parity, alpha);
+	}
 }
