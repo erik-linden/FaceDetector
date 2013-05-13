@@ -32,6 +32,7 @@ public class CascadeClassifier implements java.io.Serializable {
             for(; i < layerEnd; ++i) {
                 layer.add(classifierIterator.next());
             }
+            layers.add(layer);
         }
 
         thldAdjustments = cascadeThlds;
