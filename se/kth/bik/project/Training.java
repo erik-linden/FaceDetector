@@ -19,6 +19,8 @@ public class Training {
     private static final int NUMBER_OF_FEATURES = HaarFeatureComputer.NO_FEATURES;
     private static final double TRUE_POSITIVE_DECREASE_TOLERANCE = 0.999;
 
+    public static final String SAVE_FILENAME = "trainingData.sav";
+
     /**
      * @param args
      * @throws IOException
@@ -26,10 +28,14 @@ public class Training {
     public static void main(String[] args) throws IOException {
         CascadeClassifier tr = Training.train();
 
-        FileOutputStream saveFile = new FileOutputStream("trainingData.sav");
+        System.out.println("Training complete, writing to " + SAVE_FILENAME);
+
+        FileOutputStream saveFile = new FileOutputStream(SAVE_FILENAME);
         ObjectOutputStream save = new ObjectOutputStream(saveFile);
         save.writeObject(tr);
         save.close();
+
+        System.out.println("Write complete, nothing more to do here.");
     }
 
     private static CascadeClassifier train() throws IOException {
