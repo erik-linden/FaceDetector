@@ -18,7 +18,7 @@ public class WeakClassifier implements java.io.Serializable {
 	}
 
 	private boolean classify(double featureValue) {
-	    return parity * featureValue > parity * thld;
+	    return parity * featureValue < parity * thld;
 	}
 
     /**

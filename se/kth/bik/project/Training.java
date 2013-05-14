@@ -60,12 +60,8 @@ public class Training {
         initWeights(w_face, 1/(2*((double)nFaces)));
         initWeights(w_Nface, 1/(2*((double)nNFaces)));
 
-        double[] mu_p = new double[NUMBER_OF_FEATURES];
-        double[] mu_n = new double[NUMBER_OF_FEATURES];
         double[] thld = new double[NUMBER_OF_FEATURES];
         int[] p = new int[NUMBER_OF_FEATURES];
-        double[] err_face   = new double[NUMBER_OF_FEATURES];
-        double[] err_Nface  = new double[NUMBER_OF_FEATURES];
         List<WeakClassifier> classifier = new ArrayList<WeakClassifier>();
         List<Integer> cascadeLevels = new ArrayList<Integer>();
         List<Double> cascadeThlds = new ArrayList<Double>();
@@ -95,7 +91,7 @@ public class Training {
 
                 classifier.add(
                         selectAndTrainWeakClassifier(fv_face, fv_Nface, w_face,
-                                w_Nface, mu_p, mu_n, thld, p, err_face, err_Nface));
+                                w_Nface, thld, p));
 
                 tp = Double.MAX_VALUE;
                 while (tp > TRUE_POSITIVE_DECREASE_TOLERANCE * prev_tp) {
@@ -151,43 +147,62 @@ public class Training {
             double[][] fv_Nface,
             double[] w_face,
             double[] w_Nface,
-            double[] mu_p,
-            double[] mu_n,
             double[] thld,
-            int[] p,
-            double[] err_face,
-            double[] err_Nface) {
+            int[] p) {
 
         double normalizer = 1 / (Common.sum(w_face) + Common.sum(w_Nface));
         scaleWeights(w_face, normalizer);
         scaleWeights(w_Nface, normalizer);
 
-        weightedMean(w_face, fv_face, mu_p);
-        weightedMean(w_Nface, fv_Nface, mu_n);
+        double[] mu_p = weightedMean(w_face, fv_face);
+        double[] mu_n = weightedMean(w_Nface, fv_Nface);
 
-        setThreshold(mu_p, mu_n, thld, p);
-
-        setError(w_face, fv_face, thld, p, err_face, true);
-        setError(w_Nface, fv_Nface, thld, p, err_Nface, false);
-
-        /*
-         * Find the weak classifier that minimizes the total error
-         * on the two training sets.
-         */
-        int bestIndex = 0;
-        double minErr = Double.MAX_VALUE;
-        double err;
-
-        // Loop over features.
         for (int j=0;j<NUMBER_OF_FEATURES;j++) {
+            thld[j] = (mu_p[j]+mu_n[j])/2;
+        }
 
-            // Find minimum total error.
-            err = (err_face[j]+err_Nface[j]);
-            if(err<minErr) {
-                minErr = err;
+        int bestIndex = 0;
+        double minErr = Double.POSITIVE_INFINITY;
+        for(int j=0; j<NUMBER_OF_FEATURES; ++j) {
+            double err_minus = 0;
+            double err_plus = 0;
+
+            for(int i=0; i<fv_face.length; ++i) {
+                if(fv_face[i][j] < thld[j]) {
+                    // True positive - Increase error for parity -1
+                    err_minus += w_face[i];
+                } else {
+                    // False positive - Increase error for parity +1
+                    err_plus += w_face[i];
+                }
+            }
+
+            for(int i=0; i<fv_Nface.length; ++i) {
+                if(fv_Nface[i][j] < thld[j]) {
+                    // False negative - Increase error for parity +1
+                    err_plus += w_Nface[i];
+                } else {
+                    // True negative - Increase error for parity -1
+                    err_minus += w_Nface[i];
+                }
+            }
+
+            double err;
+            if(err_minus < err_plus) {
+                err = err_minus;
+                p[j] = -1;
+            } else {
+                err = err_plus;
+                p[j] = 1;
+            }
+
+            if(err < minErr) {
                 bestIndex = j;
+                minErr = err;
             }
         }
+
+        System.out.println("Selected feature " + bestIndex);
 
         int par = p[bestIndex];
         double threshold = thld[bestIndex];
@@ -265,12 +280,14 @@ public class Training {
         for (int i=0;i<fv_face.length;i++) {
 
             // True positive.
-            if (pos && par*fv_face[i][index]>par*thld) {
+            if (pos && par*fv_face[i][index] < par*thld) {
+                Common.debugPrint("Decreasing weight " + i);
                 w[i] *= beta;
             }
 
             // True negative.
-            else if (!pos && par*fv_face[i][index]<par*thld) {
+            else if (!pos && par*fv_face[i][index] >= par*thld) {
+                Common.debugPrint("Decreasing weight " + i);
                 w[i] *= beta;
             }
         }
@@ -295,64 +312,9 @@ public class Training {
         }
     }
 
-    /*
-     *  Finds the weighted error for each weak classifier.
-     */
-    private static void setError(double[] w, double[][] fv_face,
-            double[] thld, int[] p,
-            double[] err, boolean pos) {
+    private static double[] weightedMean(double[] w, double[][] fv_face) {
 
-        // Start by zeroing all errors.
-        for (int j=0;j<NUMBER_OF_FEATURES;j++) {
-            err[j] = 0;
-        }
-
-        // Loop over files.
-        for(int i=0;i<fv_face.length;i++)  {
-
-            // Loop over features.
-            for (int j=0;j<NUMBER_OF_FEATURES;j++) {
-
-                // If a positive example fails detection.
-                if (pos && p[j]*fv_face[i][j]<p[j]*thld[j]) {
-                    err[j] += w[i];
-                }
-
-                // If a negative example is detected.
-                else if (!pos && p[j]*fv_face[i][j]>p[j]*thld[j]) {
-                    err[j] += w[i];
-                }
-            }
-        }
-    }
-
-    /*
-     * Sets the array of thresholds thld such that
-     * the threshold lies between the mean of the positive
-     * and negative examples.
-     */
-    private static void setThreshold(double[] mu_p, double[] mu_n,
-            double[] thld, int[] p) {
-
-        // Loop over all features.
-        for (int j=0;j<NUMBER_OF_FEATURES;j++) {
-            thld[j] = (mu_p[j]+mu_n[j])/2;
-
-            // Heuristics (good) for setting
-            // the parity.
-            if(mu_p[j]>mu_n[j]) {
-                p[j] = 1;
-            }
-            else {
-                p[j] = -1;
-            }
-        }
-    }
-
-    /*
-     * The result is placed in mu.
-     */
-    private static void weightedMean(double[] w, double[][] fv_face, double[] mu) {
+        double[] mu = new double[NUMBER_OF_FEATURES];
 
         // Set everything to zero
         for (int j=0;j<NUMBER_OF_FEATURES;j++) {
@@ -376,6 +338,8 @@ public class Training {
         for (int j=0;j<NUMBER_OF_FEATURES;j++) {
             mu[j] /= w_sum;
         }
+
+        return mu;
     }
 
     /*
