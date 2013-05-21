@@ -11,14 +11,14 @@ public class CascadeClassifier implements java.io.Serializable {
 	 */
     private static final long serialVersionUID = 1L;
 
-    private List<List<WeakClassifier>> layers;
-    private List<Double> thldAdjustments;
+    private LinkedList<LinkedList<WeakClassifier>> layers;
+    private LinkedList<Double> thldAdjustments;
 
     public CascadeClassifier(List<WeakClassifier> weakClassifiers,
             List<Integer> cascadeLevels,
             List<Double> cascadeThlds) {
 
-        layers = new LinkedList<List<WeakClassifier>>();
+        layers = new LinkedList<LinkedList<WeakClassifier>>();
 
         Iterator<WeakClassifier> classifierIterator =
                 weakClassifiers.iterator();
@@ -27,7 +27,7 @@ public class CascadeClassifier implements java.io.Serializable {
         for(int i=0; layerIterator.hasNext(); ) {
             int layerEnd = layerIterator.next();
 
-            List<WeakClassifier> layer = new LinkedList<WeakClassifier>();
+            LinkedList<WeakClassifier> layer = new LinkedList<WeakClassifier>();
 
             for(; i < layerEnd; ++i) {
                 layer.add(classifierIterator.next());
@@ -35,14 +35,14 @@ public class CascadeClassifier implements java.io.Serializable {
             layers.add(layer);
         }
 
-        thldAdjustments = cascadeThlds;
+        thldAdjustments = new LinkedList<Double>(cascadeThlds);
     }
 
     public boolean classifyPatch(HaarFeatureComputer featureComputer, double thld_gain) {
         double sumH = 0;
         double sumA = 0;
 
-        Iterator<List<WeakClassifier>> layerIterator = layers.iterator();
+        Iterator<LinkedList<WeakClassifier>> layerIterator = layers.iterator();
         Iterator<Double> thldIterator = thldAdjustments.iterator();
 
         while(layerIterator.hasNext()) {
