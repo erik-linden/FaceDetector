@@ -18,6 +18,7 @@ public class Training {
     private static final int NUMBER_OF_FEATURES = HaarFeatureComputer.NO_FEATURES;
     private static final double TRUE_POSITIVE_DECREASE_TOLERANCE = 0.999;
     private static final double FALSE_POSITIVE_DECREASE_PER_LAYER = 0.75;
+    private static final double THRESHOLD_ADJUSTMENT_STEPSIZE = 1E-4;
 
     public static final String SAVE_FILENAME = "trainingData.sav";
 
@@ -98,25 +99,27 @@ public class Training {
                                 w_Nface));
                 System.out.println("Selection took " + (System.currentTimeMillis() - selectTime) + " ms");
 
-                long findThldAdjStartTime = System.currentTimeMillis();
-
                 tp = Double.MAX_VALUE;
-                double thld_adj_max = 10;
-                double thld_adj_min = 0;
-                for(int it=0; it<25 || tp < TRUE_POSITIVE_DECREASE_TOLERANCE * prev_tp; ++it) {
-                    thld_adj = (thld_adj_max + thld_adj_min)/2;
+                while (tp > TRUE_POSITIVE_DECREASE_TOLERANCE * prev_tp) {
+                    thld_adj += THRESHOLD_ADJUSTMENT_STEPSIZE;
                     tp = ((double)testCascade(fv_face, classifier,
                             cascadeLevels,  cascadeThlds, thld_adj))/((double)nFaces);
-                    if(tp > TRUE_POSITIVE_DECREASE_TOLERANCE * prev_tp) {
-                        thld_adj_min = thld_adj;
-                    } else {
-                        thld_adj_max = thld_adj;
-                    }
+                }
+                while (tp < TRUE_POSITIVE_DECREASE_TOLERANCE * prev_tp && thld_adj>0) {
+                    thld_adj -= THRESHOLD_ADJUSTMENT_STEPSIZE;
+                    tp = ((double)testCascade(fv_face, classifier,
+                            cascadeLevels, cascadeThlds, thld_adj))/((double)nFaces);
                 }
 
-                System.out.println("Took " + (System.currentTimeMillis() - findThldAdjStartTime) + " ms to find threshold adj");
-
-                fp = testCascade(fv_Nface, classifier, cascadeLevels, cascadeThlds, thld_adj)/((double)nNFaces);
+                if (thld_adj <= 0) {
+                    fp = prev_fp*2;
+                }
+                else {
+                    fp = testCascade(fv_Nface, classifier,
+                            cascadeLevels, cascadeThlds, thld_adj);
+                    System.out.println(fp);
+                    fp = fp/((double)nNFaces));
+                }
 
                 System.out.println("TPR: "+tp+" with thld adj "+thld_adj);
                 System.out.println("FPR: "+fp+" with thld adj "+thld_adj);
