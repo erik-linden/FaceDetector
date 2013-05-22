@@ -274,16 +274,10 @@ public class Training {
 
         // Loop over files.
         for (int i=0;i<fv_face.length;i++) {
-
-            // True positive.
-            if (pos && par*fv_face[i][index] < par*thld) {
-                Common.debugPrint("Decreasing weight " + i);
-                w[i] *= beta;
-            }
-
-            // True negative.
-            else if (!pos && par*fv_face[i][index] >= par*thld) {
-                Common.debugPrint("Decreasing weight " + i);
+            if (
+                    (pos && par*fv_face[i][index] <  par*thld)    // True positive
+                || (!pos && par*fv_face[i][index] >= par*thld)    // True negative
+                ) {
                 w[i] *= beta;
             }
         }
