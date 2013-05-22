@@ -202,7 +202,8 @@ public class Training {
             }
         }
 
-        System.out.println("Selected feature " + bestIndex);
+        System.out.println(String.format("Selected feature %d with error %.3f, threshold %.3f, parity %d", bestIndex, minErr, bestThreshold, bestParity));
+
         double alpha = updateWeights(w_face, fv_face, bestIndex, bestParity, bestThreshold, minErr, true);
         updateWeights(w_Nface, fv_Nface, bestIndex, bestParity, bestThreshold, minErr, false);
 
