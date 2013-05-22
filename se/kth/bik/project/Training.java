@@ -116,8 +116,7 @@ public class Training {
 
                 System.out.println("Took " + (System.currentTimeMillis() - findThldAdjStartTime) + " ms to find threshold adj");
 
-                fp = testCascade(fv_Nface, classifier, cascadeLevels, cascadeThlds, thld_adj);
-                fp = fp/((double)nNFaces);
+                fp = testCascade(fv_Nface, classifier, cascadeLevels, cascadeThlds, thld_adj)/((double)nNFaces);
 
                 System.out.println("TPR: "+tp+" with thld adj "+thld_adj);
                 System.out.println("FPR: "+fp+" with thld adj "+thld_adj);
