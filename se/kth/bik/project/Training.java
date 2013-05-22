@@ -12,11 +12,11 @@ import javax.swing.JFrame;
 
 public class Training {
 
-    private static final double FALSE_POSITIVE_CHANCE_TARGET = 1e-3;
+    private static final double FALSE_POSITIVE_CHANCE_TARGET = 5e-3;
     private static final int MAX_NUMBER_OF_LAYERS = 20;
     private static final int MAX_NUMBER_OF_WEAK_CLASSIFIERS = 500;
     private static final int NUMBER_OF_FEATURES = HaarFeatureComputer.NO_FEATURES;
-    private static final double TRUE_POSITIVE_DECREASE_TOLERANCE = 0.999;
+    private static final double TRUE_POSITIVE_DECREASE_TOLERANCE = 0.995;
     private static final double FALSE_POSITIVE_DECREASE_PER_LAYER = 0.75;
     private static final double THRESHOLD_ADJUSTMENT_STEPSIZE = 1E-4;
 
@@ -64,8 +64,14 @@ public class Training {
 
         double[] w_face = new double[nFaces];
         double[] w_Nface = new double[nNFaces];
-        initWeights(w_face, 1/(2*((double)nFaces)));
-        initWeights(w_Nface, 1/(2*((double)nNFaces)));
+        initWeights(w_face, 0.5/(nFaces/2));
+        initWeights(w_Nface, 0.5/(nNFaces/2));
+        for(int i=1; i<nFaces; i+=2) {
+            w_face[i] = 0;
+        }
+        for(int i=1; i<nNFaces; i+=2) {
+            w_Nface[i] = 0;
+        }
 
         List<WeakClassifier> classifier = new ArrayList<WeakClassifier>();
         List<Integer> cascadeLevels = new ArrayList<Integer>();
@@ -103,12 +109,12 @@ public class Training {
                 while (tp > TRUE_POSITIVE_DECREASE_TOLERANCE * prev_tp) {
                     thld_adj += THRESHOLD_ADJUSTMENT_STEPSIZE;
                     tp = ((double)testCascade(fv_face, classifier,
-                            cascadeLevels,  cascadeThlds, thld_adj))/((double)nFaces);
+                            cascadeLevels,  cascadeThlds, thld_adj))/(nFaces/2);
                 }
                 while (tp < TRUE_POSITIVE_DECREASE_TOLERANCE * prev_tp && thld_adj>0) {
                     thld_adj -= THRESHOLD_ADJUSTMENT_STEPSIZE;
                     tp = ((double)testCascade(fv_face, classifier,
-                            cascadeLevels, cascadeThlds, thld_adj))/((double)nFaces);
+                            cascadeLevels, cascadeThlds, thld_adj))/(nFaces/2);
                 }
 
                 if (thld_adj <= 0) {
@@ -118,7 +124,7 @@ public class Training {
                     fp = testCascade(fv_Nface, classifier,
                             cascadeLevels, cascadeThlds, thld_adj);
                     System.out.println(fp);
-                    fp = fp/((double)nNFaces));
+                    fp = fp/((double)(nNFaces/2));
                 }
 
                 System.out.println("TPR: "+tp+" with thld adj "+thld_adj);
@@ -173,7 +179,7 @@ public class Training {
             double err_minus = 0;
             double err_plus = 0;
 
-            for(int i=0; i<w_face.length; ++i) {
+            for(int i=0; i<w_face.length; i+=2) {
                 if(fv_face[i][j] < thld[j]) {
                     // True positive - Increase error for parity -1
                     err_minus += w_face[i];
@@ -186,7 +192,7 @@ public class Training {
                 }
             }
 
-            for(int i=0; i<w_Nface.length; ++i) {
+            for(int i=0; i<w_Nface.length; i+=2) {
                 if(fv_Nface[i][j] < thld[j]) {
                     // False negative - Increase error for parity +1
                     err_plus += w_Nface[i];
@@ -229,7 +235,7 @@ public class Training {
             List<Integer> cascadeLevels, List<Double> cascadeThlds, double thld_adj) {
 
         int sumDetection = 0;
-        for (int i=0;i<fv_face.length;i++) {
+        for (int i=1;i<fv_face.length;i+=2) {
             double sumH = 0;
             double sumA = 0;
             int s = 0;
