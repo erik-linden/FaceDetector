@@ -171,7 +171,7 @@ public class Training {
             double err_minus = 0;
             double err_plus = 0;
 
-            for(int i=0; i<fv_face.length; ++i) {
+            for(int i=0; i<w_face.length; ++i) {
                 if(fv_face[i][j] < thld[j]) {
                     // True positive - Increase error for parity -1
                     err_minus += w_face[i];
@@ -184,7 +184,7 @@ public class Training {
                 }
             }
 
-            for(int i=0; i<fv_Nface.length; ++i) {
+            for(int i=0; i<w_Nface.length; ++i) {
                 if(fv_Nface[i][j] < thld[j]) {
                     // False negative - Increase error for parity +1
                     err_plus += w_Nface[i];
@@ -287,7 +287,7 @@ public class Training {
         double alpha = Math.log(1/beta);
 
         // Loop over files.
-        for (int i=0;i<fv_face.length;i++) {
+        for (int i=0;i<w.length;i++) {
             if (
                     (pos && par*fv_face[i][index] <  par*thld)    // True positive
                 || (!pos && par*fv_face[i][index] >= par*thld)    // True negative
@@ -328,7 +328,7 @@ public class Training {
         double w_sum = 0;
 
         // Loop over files
-        for (int i=0;i<fv_face.length;i++) {
+        for (int i=0;i<w.length;i++) {
 
             // Loop over features
             for (int j=0;j<NUMBER_OF_FEATURES;j++) {
