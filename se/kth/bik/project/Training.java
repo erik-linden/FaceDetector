@@ -13,7 +13,6 @@ import javax.swing.JFrame;
 public class Training {
 
     private static final double FALSE_POSITIVE_CHANCE_TARGET = 1e-3;
-    private static final double THRESHOLD_ADJUSTMENT_STEPSIZE = 0.0001;
     private static final int MAX_NUMBER_OF_LAYERS = 20;
     private static final int MAX_NUMBER_OF_WEAK_CLASSIFIERS = 500;
     private static final int NUMBER_OF_FEATURES = HaarFeatureComputer.NO_FEATURES;
@@ -99,40 +98,37 @@ public class Training {
                                 w_Nface));
                 System.out.println("Selection took " + (System.currentTimeMillis() - selectTime) + " ms");
 
+                long findThldAdjStartTime = System.currentTimeMillis();
+
                 tp = Double.MAX_VALUE;
-                while (tp > TRUE_POSITIVE_DECREASE_TOLERANCE * prev_tp) {
-                    thld_adj += THRESHOLD_ADJUSTMENT_STEPSIZE;
+                double thld_adj_max = 10;
+                double thld_adj_min = 0;
+                for(int it=0; it<25 || tp < TRUE_POSITIVE_DECREASE_TOLERANCE * prev_tp; ++it) {
+                    thld_adj = (thld_adj_max + thld_adj_min)/2;
                     tp = ((double)testCascade(fv_face, classifier,
                             cascadeLevels,  cascadeThlds, thld_adj))/((double)nFaces);
+                    if(tp > TRUE_POSITIVE_DECREASE_TOLERANCE * prev_tp) {
+                        thld_adj_min = thld_adj;
+                    } else {
+                        thld_adj_max = thld_adj;
+                    }
                 }
-                while (tp < TRUE_POSITIVE_DECREASE_TOLERANCE * prev_tp && thld_adj>0) {
-                    thld_adj -= THRESHOLD_ADJUSTMENT_STEPSIZE;
-                    tp = ((double)testCascade(fv_face, classifier,
-                            cascadeLevels, cascadeThlds, thld_adj))/((double)nFaces);
-                }
+
+                System.out.println("Took " + (System.currentTimeMillis() - findThldAdjStartTime) + " ms to find threshold adj");
+
+                fp = testCascade(fv_Nface, classifier, cascadeLevels, cascadeThlds, thld_adj);
+                fp = fp/((double)nNFaces);
 
                 System.out.println("TPR: "+tp+" with thld adj "+thld_adj);
+                System.out.println("FPR: "+fp+" with thld adj "+thld_adj);
+                System.out.println("Took " + (System.currentTimeMillis()-startTime) + " ms to add weak classifier");
 
-                if (thld_adj <= 0) {
-                    fp = prev_fp*2;
-                }
-                else {
-                    fp = testCascade(fv_Nface, classifier,
-                            cascadeLevels, cascadeThlds, thld_adj);
-                    System.out.println(fp);
-                    fp = fp/((double)nNFaces);
-                }
 
                 if (frame != null) {
                     frame.setVisible(false);
                     frame.dispose();
                 }
-//                frame = HaarFeature.showClassifierImg(classifier);
-
-                System.out.println("FPR: "+fp+" with thld adj "+thld_adj);
-
-                System.out.println((System.currentTimeMillis()-startTime));
-
+//                frame = HaarFeatureComputer.showClassifierImg(classifier);
 
             }
 
