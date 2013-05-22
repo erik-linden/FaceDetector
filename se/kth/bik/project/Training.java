@@ -280,7 +280,7 @@ public class Training {
     /*
      * Lowers the weight on correctly classified training data.
      */
-    private static double updateWeights(double[] w, double[][] fv_face,
+    private static double updateWeights(double[] w, double[][] fv,
             int index, int par, double thld, double err, boolean pos) {
 
         double beta = err/(1-err);
@@ -289,8 +289,8 @@ public class Training {
         // Loop over files.
         for (int i=0;i<w.length;i++) {
             if (
-                    (pos && par*fv_face[i][index] <  par*thld)    // True positive
-                || (!pos && par*fv_face[i][index] >= par*thld)    // True negative
+                    (pos && par*fv[i][index] <  par*thld)    // True positive
+                || (!pos && par*fv[i][index] >= par*thld)    // True negative
                 ) {
                 w[i] *= beta;
             }
@@ -316,7 +316,7 @@ public class Training {
         }
     }
 
-    private static double[] weightedMean(double[] w, double[][] fv_face) {
+    private static double[] weightedMean(double[] w, double[][] fv) {
 
         double[] mu = new double[NUMBER_OF_FEATURES];
 
@@ -332,7 +332,7 @@ public class Training {
 
             // Loop over features
             for (int j=0;j<NUMBER_OF_FEATURES;j++) {
-                mu[j] += w[i]*fv_face[i][j];
+                mu[j] += w[i]*fv[i][j];
             }
 
             w_sum += w[i];
