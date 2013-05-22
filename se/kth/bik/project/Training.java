@@ -93,9 +93,11 @@ public class Training {
 
                 System.out.println("\nFeature no: "+n);
 
+                long selectTime = System.currentTimeMillis();
                 classifier.add(
                         selectAndTrainWeakClassifier(fv_face, fv_Nface, w_face,
                                 w_Nface));
+                System.out.println("Selection took " + (System.currentTimeMillis() - selectTime) + " ms");
 
                 tp = Double.MAX_VALUE;
                 while (tp > TRUE_POSITIVE_DECREASE_TOLERANCE * prev_tp) {
@@ -170,27 +172,42 @@ public class Training {
 
         double minErr = Double.POSITIVE_INFINITY;
         for(int j=0; j<NUMBER_OF_FEATURES; ++j) {
-            double err = 0;
+            double err_minus = 0;
+            double err_plus = 0;
 
             for(int i=0; i<fv_face.length; ++i) {
-                if(fv_face[i][j] >= thld[j]) {
+                if(fv_face[i][j] < thld[j]) {
+                    // True positive - Increase error for parity -1
+                    err_minus += w_face[i];
+                } else {
                     // False positive - Increase error for parity +1
-                    err += w_face[i];
+                    err_plus += w_face[i];
+                }
+                if(err_minus > minErr && err_plus > minErr) {
+                    break;
                 }
             }
 
             for(int i=0; i<fv_Nface.length; ++i) {
                 if(fv_Nface[i][j] < thld[j]) {
                     // False negative - Increase error for parity +1
-                    err += w_Nface[i];
+                    err_plus += w_Nface[i];
+                } else {
+                    // True negative - Increase error for parity -1
+                    err_minus += w_Nface[i];
+                }
+                if(err_minus > minErr && err_plus > minErr) {
+                    break;
                 }
             }
 
             int p;
-            if(err > 0.5) {
-                err = 1 - err;
+            double err;
+            if(err_minus < err_plus) {
+                err = err_minus;
                 p = -1;
             } else {
+                err = err_plus;
                 p = 1;
             }
 
