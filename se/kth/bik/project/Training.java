@@ -17,6 +17,7 @@ public class Training {
     private static final int MAX_NUMBER_OF_WEAK_CLASSIFIERS = 500;
     private static final int NUMBER_OF_FEATURES = HaarFeatureComputer.NO_FEATURES;
     private static final double TRUE_POSITIVE_DECREASE_TOLERANCE = 0.999;
+    private static final double FALSE_POSITIVE_DECREASE_PER_LAYER = 0.75;
 
     public static final String SAVE_FILENAME = "trainingData.sav";
 
@@ -71,7 +72,6 @@ public class Training {
 
         JFrame frame = null;
 
-        double f = 0.75;
 
         int i = 0;
         int n = 0;
@@ -86,7 +86,7 @@ public class Training {
             i++;
             prev_fp = fp;
             prev_tp = tp;
-            while (fp > f * prev_fp && n < MAX_NUMBER_OF_WEAK_CLASSIFIERS) {
+            while (fp > FALSE_POSITIVE_DECREASE_PER_LAYER * prev_fp && n < MAX_NUMBER_OF_WEAK_CLASSIFIERS) {
                 n++;
                 long startTime = System.currentTimeMillis();
 
