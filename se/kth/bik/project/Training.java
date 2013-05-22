@@ -66,8 +66,6 @@ public class Training {
         initWeights(w_face, 1/(2*((double)nFaces)));
         initWeights(w_Nface, 1/(2*((double)nNFaces)));
 
-        double[] thld = new double[NUMBER_OF_FEATURES];
-        int[] p = new int[NUMBER_OF_FEATURES];
         List<WeakClassifier> classifier = new ArrayList<WeakClassifier>();
         List<Integer> cascadeLevels = new ArrayList<Integer>();
         List<Double> cascadeThlds = new ArrayList<Double>();
@@ -97,7 +95,7 @@ public class Training {
 
                 classifier.add(
                         selectAndTrainWeakClassifier(fv_face, fv_Nface, w_face,
-                                w_Nface, thld, p));
+                                w_Nface));
 
                 tp = Double.MAX_VALUE;
                 while (tp > TRUE_POSITIVE_DECREASE_TOLERANCE * prev_tp) {
@@ -152,9 +150,7 @@ public class Training {
     private static WeakClassifier selectAndTrainWeakClassifier(double[][] fv_face,
             double[][] fv_Nface,
             double[] w_face,
-            double[] w_Nface,
-            double[] thld,
-            int[] p) {
+            double[] w_Nface) {
 
         double normalizer = 1 / (Common.sum(w_face) + Common.sum(w_Nface));
         scaleWeights(w_face, normalizer);
@@ -162,61 +158,55 @@ public class Training {
 
         double[] mu_p = weightedMean(w_face, fv_face);
         double[] mu_n = weightedMean(w_Nface, fv_Nface);
+        double[] thld = new double[NUMBER_OF_FEATURES];
 
         for (int j=0;j<NUMBER_OF_FEATURES;j++) {
             thld[j] = (mu_p[j]+mu_n[j])/2;
         }
 
         int bestIndex = 0;
+        int bestParity = 1;
+        double bestThreshold = 0;
+
         double minErr = Double.POSITIVE_INFINITY;
         for(int j=0; j<NUMBER_OF_FEATURES; ++j) {
-            double err_minus = 0;
-            double err_plus = 0;
+            double err = 0;
 
             for(int i=0; i<fv_face.length; ++i) {
-                if(fv_face[i][j] < thld[j]) {
-                    // True positive - Increase error for parity -1
-                    err_minus += w_face[i];
-                } else {
+                if(fv_face[i][j] >= thld[j]) {
                     // False positive - Increase error for parity +1
-                    err_plus += w_face[i];
+                    err += w_face[i];
                 }
             }
 
             for(int i=0; i<fv_Nface.length; ++i) {
                 if(fv_Nface[i][j] < thld[j]) {
                     // False negative - Increase error for parity +1
-                    err_plus += w_Nface[i];
-                } else {
-                    // True negative - Increase error for parity -1
-                    err_minus += w_Nface[i];
+                    err += w_Nface[i];
                 }
             }
 
-            double err;
-            if(err_minus < err_plus) {
-                err = err_minus;
-                p[j] = -1;
+            int p;
+            if(err > 0.5) {
+                err = 1 - err;
+                p = -1;
             } else {
-                err = err_plus;
-                p[j] = 1;
+                p = 1;
             }
 
             if(err < minErr) {
                 bestIndex = j;
+                bestParity = p;
+                bestThreshold = thld[bestIndex];
                 minErr = err;
             }
         }
 
         System.out.println("Selected feature " + bestIndex);
+        double alpha = updateWeights(w_face, fv_face, bestIndex, bestParity, bestThreshold, minErr, true);
+        updateWeights(w_Nface, fv_Nface, bestIndex, bestParity, bestThreshold, minErr, false);
 
-        int par = p[bestIndex];
-        double threshold = thld[bestIndex];
-
-        double alpha = updateWeights(w_face, fv_face, bestIndex, par, threshold, minErr, true);
-        updateWeights(w_Nface, fv_Nface, bestIndex, par, threshold, minErr, false);
-
-        return new WeakClassifier(bestIndex,threshold,par,alpha);
+        return new WeakClassifier(bestIndex,bestThreshold,bestParity,alpha);
     }
 
     private static int testCascade(double[][] fv_face, List<WeakClassifier> weakClassifiers,
